@@ -18,7 +18,8 @@
  * - Never prints or leaks secrets, client secret, or refresh tokens.
  */
 
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 const emailService = require('../services/emailService');
 
 function maskString(str, visibleChars = 4) {
