@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | <%= settings.companyName %> Admin</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="adminSidebar">
+      <div class="sidebar-brand">
+        <span class="nav-brand-icon">&#9670;</span>
+        <span><%= settings.companyName %></span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/admin/dashboard" class="sidebar-link">
+          <span class="sidebar-icon">&#128200;</span> Dashboard
+        </a>
+        <a href="/admin/bookings" class="sidebar-link <%= (!currentFilter || currentFilter === 'all') ? 'active' : '' %>">
+          <span class="sidebar-icon">&#128203;</span> All Bookings
+        </a>
+        <a href="/admin/bookings?status=pending" class="sidebar-link <%= currentFilter === 'pending' ? 'active' : '' %>">
+          <span class="sidebar-icon">&#9203;</span> Pending
+        </a>
+        <a href="/admin/bookings?status=accepted" class="sidebar-link <%= currentFilter === 'accepted' ? 'active' : '' %>">
+          <span class="sidebar-icon">&#9989;</span> Accepted
+        </a>
+        <a href="/admin/bookings?status=rejected" class="sidebar-link <%= (currentFilter === 'rejected' || currentFilter === 'cancelled') ? 'active' : '' %>">
+          <span class="sidebar-icon">&#10060;</span> Rejected / Cancelled
+        </a>
+        <div class="sidebar-divider"></div>
+        <a href="/admin/calendar" class="sidebar-link">
+          <span class="sidebar-icon">&#128197;</span> Calendar
+        </a>
+        <a href="/admin/blocked-dates" class="sidebar-link">
+          <span class="sidebar-icon">&#128683;</span> Blocked Dates
+        </a>
+        <a href="/admin/services" class="sidebar-link">
+          <span class="sidebar-icon">&#128736;</span> Services
+        </a>
+        <a href="/admin/settings" class="sidebar-link">
+          <span class="sidebar-icon">&#9881;</span> Settings
+        </a>
+        <div class="sidebar-divider"></div>
+        <a href="/admin/logout" class="sidebar-link">
+          <span class="sidebar-icon">&#128682;</span> Logout
+        </a>
+        <a href="/" class="sidebar-link" target="_blank">
+          <span class="sidebar-icon">&#8592;</span> Back to Site
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <header class="admin-header">
+        <button class="admin-sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+          <span></span><span></span><span></span>
+        </button>
+        <h2 class="admin-header-title"><%= title %></h2>
+        <div class="admin-header-right">
+          <span class="admin-user-email"><%= admin ? admin.email : '' %></span>
+          <a href="/admin/logout" class="btn btn-secondary btn-sm">Logout</a>
+        </div>
+      </header>
+
+      <div class="admin-content">
+        <!-- Search & Filter Bar -->
+        <div class="admin-toolbar card" style="padding: 1rem 1.25rem; margin-bottom: 1.5rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between;">
+          <!-- Filter Tabs -->
+          <div class="filter-tabs" style="margin-bottom: 0;">
+            <a href="/admin/bookings<%= searchQuery ? '?search=' + encodeURIComponent(searchQuery) : '' %>" class="filter-tab <%= (!currentFilter || currentFilter === 'all') ? 'active' : '' %>">All</a>
+            <a href="/admin/bookings?status=pending<%= searchQuery ? '&search=' + encodeURIComponent(searchQuery) : '' %>" class="filter-tab <%= currentFilter === 'pending' ? 'active' : '' %>">Pending</a>
+            <a href="/admin/bookings?status=accepted<%= searchQuery ? '&search=' + encodeURIComponent(searchQuery) : '' %>" class="filter-tab <%= currentFilter === 'accepted' ? 'active' : '' %>">Accepted</a>
+            <a href="/admin/bookings?status=rejected<%= searchQuery ? '&search=' + encodeURIComponent(searchQuery) : '' %>" class="filter-tab <%= currentFilter === 'rejected' ? 'active' : '' %>">Rejected</a>
+            <a href="/admin/bookings?status=cancelled<%= searchQuery ? '&search=' + encodeURIComponent(searchQuery) : '' %>" class="filter-tab <%= currentFilter === 'cancelled' ? 'active' : '' %>">Cancelled</a>
+          </div>
+
+          <!-- Search Form -->
+          <form action="/admin/bookings" method="GET" class="admin-search-form" style="display: flex; gap: 0.5rem; flex: 1; max-width: 380px;">
+            <% if (currentFilter && currentFilter !== 'all') { %>
+              <input type="hidden" name="status" value="<%= currentFilter %>">
+            <% } %>
+            <input type="text" name="search" class="form-input" placeholder="Search by name, email, phone, ID..." value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" style="padding: 0.45rem 0.85rem; font-size: 0.9rem;">
+            <button type="submit" class="btn btn-primary btn-sm">Search</button>
+            <% if (typeof searchQuery !== 'undefined' && searchQuery) { %>
+              <a href="/admin/bookings<%= currentFilter && currentFilter !== 'all' ? '?status=' + currentFilter : '' %>" class="btn btn-secondary btn-sm" title="Clear search">&#10005;</a>
+            <% } %>
+          </form>
+        </div>
+
+        <!-- Bookings Table -->
+        <div class="card admin-table-card">
+          <% if (bookings && bookings.length > 0) { %>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Booking ID</th>
+                    <th>Customer</th>
+                    <th>Service</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% bookings.forEach(function(booking) { %>
+                    <tr>
+                      <td><strong>SAB-<%= booking.bookingId || booking._id.toString().slice(-6).toUpperCase() %></strong></td>
+                      <td>
+                        <div><%= booking.customerName %></div>
+                        <small class="text-muted"><%= booking.customerEmail %></small>
+                      </td>
+                      <td><%= booking.service ? booking.service.name : 'N/A' %></td>
+                      <td><%= new Date(booking.appointmentDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></td>
+                      <td><%= booking.appointmentTime %></td>
+                      <td>
+                        <span class="badge badge-<%= booking.status %>"><%= booking.status.charAt(0).toUpperCase() + booking.status.slice(1) %></span>
+                      </td>
+                      <td>
+                        <a href="/admin/bookings/<%= booking._id %>" class="btn btn-secondary btn-sm">View</a>
+                      </td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Pagination -->
+            <% if (pagination && pagination.totalPages > 1) { %>
+              <div class="pagination">
+                <% if (pagination.currentPage > 1) { %>
+                  <a href="?<%= currentFilter ? 'status=' + currentFilter + '&' : '' %>page=<%= pagination.currentPage - 1 %>" class="pagination-link">&laquo; Prev</a>
+                <% } %>
+                <% for (let i = 1; i <= pagination.totalPages; i++) { %>
+                  <a href="?<%= currentFilter ? 'status=' + currentFilter + '&' : '' %>page=<%= i %>" class="pagination-link <%= i === pagination.currentPage ? 'active' : '' %>"><%= i %></a>
+                <% } %>
+                <% if (pagination.currentPage < pagination.totalPages) { %>
+                  <a href="?<%= currentFilter ? 'status=' + currentFilter + '&' : '' %>page=<%= pagination.currentPage + 1 %>" class="pagination-link">Next &raquo;</a>
+                <% } %>
+              </div>
+            <% } %>
+          <% } else { %>
+            <div class="admin-empty-state">
+              <div class="empty-icon">&#128203;</div>
+              <h3>No Bookings Found</h3>
+              <p>There are no bookings matching your current filter.</p>
+              <a href="/admin/bookings" class="btn btn-secondary">View All Bookings</a>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

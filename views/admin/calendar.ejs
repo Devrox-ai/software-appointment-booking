@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | <%= settings.companyName %> Admin</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="adminSidebar">
+      <div class="sidebar-brand">
+        <span class="nav-brand-icon">&#9670;</span>
+        <span><%= settings.companyName %></span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/admin/dashboard" class="sidebar-link">
+          <span class="sidebar-icon">&#128200;</span> Dashboard
+        </a>
+        <a href="/admin/bookings" class="sidebar-link">
+          <span class="sidebar-icon">&#128203;</span> All Bookings
+        </a>
+        <a href="/admin/bookings?status=pending" class="sidebar-link">
+          <span class="sidebar-icon">&#9203;</span> Pending
+        </a>
+        <a href="/admin/bookings?status=accepted" class="sidebar-link">
+          <span class="sidebar-icon">&#9989;</span> Accepted
+        </a>
+        <a href="/admin/bookings?status=rejected" class="sidebar-link">
+          <span class="sidebar-icon">&#10060;</span> Rejected / Cancelled
+        </a>
+        <div class="sidebar-divider"></div>
+        <a href="/admin/calendar" class="sidebar-link active">
+          <span class="sidebar-icon">&#128197;</span> Calendar
+        </a>
+        <a href="/admin/blocked-dates" class="sidebar-link">
+          <span class="sidebar-icon">&#128683;</span> Blocked Dates
+        </a>
+        <a href="/admin/services" class="sidebar-link">
+          <span class="sidebar-icon">&#128736;</span> Services
+        </a>
+        <a href="/admin/settings" class="sidebar-link">
+          <span class="sidebar-icon">&#9881;</span> Settings
+        </a>
+        <div class="sidebar-divider"></div>
+        <a href="/admin/logout" class="sidebar-link">
+          <span class="sidebar-icon">&#128682;</span> Logout
+        </a>
+        <a href="/" class="sidebar-link" target="_blank">
+          <span class="sidebar-icon">&#8592;</span> Back to Site
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <header class="admin-header">
+        <button class="admin-sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+          <span></span><span></span><span></span>
+        </button>
+        <h2 class="admin-header-title">Calendar</h2>
+        <div class="admin-header-right">
+          <span class="admin-user-email"><%= admin ? admin.email : '' %></span>
+          <a href="/admin/logout" class="btn btn-secondary btn-sm">Logout</a>
+        </div>
+      </header>
+
+      <div class="admin-content">
+        <!-- Calendar Legend -->
+        <div class="calendar-legend">
+          <div class="legend-item">
+            <span class="legend-dot legend-available"></span> Available
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot legend-pending"></span> Pending
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot legend-accepted"></span> Accepted
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot legend-blocked"></span> Blocked
+          </div>
+        </div>
+
+        <div class="grid-2 calendar-layout">
+          <!-- Calendar -->
+          <div class="card calendar-main-card">
+            <!-- Calendar Navigation -->
+            <div class="calendar-nav">
+              <button type="button" class="btn btn-secondary btn-sm" id="calendarPrev">&laquo; Prev</button>
+              <h3 class="calendar-month-year" id="calendarMonthYear">Loading...</h3>
+              <button type="button" class="btn btn-secondary btn-sm" id="calendarNext">Next &raquo;</button>
+            </div>
+
+            <!-- Calendar Grid (rendered by admin.js) -->
+            <div id="adminCalendarGrid" class="admin-calendar-grid">
+              <!-- Calendar days rendered by JavaScript -->
+            </div>
+          </div>
+
+          <!-- Day Detail Panel -->
+          <div class="card day-detail-panel" id="dayDetailPanel">
+            <h3 class="day-detail-title" id="dayDetailTitle">Select a Day</h3>
+            <p class="day-detail-subtitle" id="dayDetailSubtitle">Click on a calendar day to view its details.</p>
+
+            <div id="dayDetailContent" style="display: none;">
+              <!-- Appointments List -->
+              <div id="dayAppointmentsList" class="day-appointments-list">
+                <!-- Populated by admin.js -->
+              </div>
+
+              <!-- Block/Unblock Button -->
+              <div class="day-detail-actions" id="dayDetailActions">
+                <form id="blockDateForm" action="/admin/block-date" method="POST">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <input type="hidden" name="date" id="blockDateInput" value="">
+                  <input type="hidden" name="reason" value="Blocked from calendar">
+                  <button type="submit" class="btn btn-danger btn-block" id="blockDateBtn">&#128683; Block This Date</button>
+                </form>
+                <form id="unblockDateForm" action="/admin/unblock-date" method="POST" style="display: none;">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <input type="hidden" name="date" id="unblockDateInput" value="">
+                  <button type="submit" class="btn btn-success btn-block" id="unblockDateBtn">&#9989; Unblock This Date</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<%- include('partials/header') %>
+
+  <!-- Error Page -->
+  <section class="section error-section">
+    <div class="container">
+      <div class="error-content">
+        <div class="error-code"><%= typeof statusCode !== 'undefined' ? statusCode : '500' %></div>
+        <h1 class="error-title"><%= typeof message !== 'undefined' ? message : 'Something went wrong' %></h1>
+        <p class="error-description">
+          <% if (typeof statusCode !== 'undefined' && statusCode === 404) { %>
+            The page you're looking for doesn't exist or has been moved. Please check the URL and try again.
+          <% } else if (typeof statusCode !== 'undefined' && statusCode === 403) { %>
+            You don't have permission to access this resource. Please contact us if you believe this is an error.
+          <% } else { %>
+            An unexpected error occurred. Please try again later or contact our support team if the problem persists.
+          <% } %>
+        </p>
+        <div class="error-actions">
+          <a href="/" class="btn btn-primary">Go Home</a>
+          <a href="/contact" class="btn btn-secondary">Contact Support</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | <%= settings.companyName %> Admin</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="adminSidebar">
+      <div class="sidebar-brand">
+        <span class="nav-brand-icon">&#9670;</span>
+        <span><%= settings.companyName %></span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/admin/dashboard" class="sidebar-link">
+          <span class="sidebar-icon">&#128200;</span> Dashboard
+        </a>
+        <a href="/admin/bookings" class="sidebar-link active">
+          <span class="sidebar-icon">&#128203;</span> All Bookings
+        </a>
+        <a href="/admin/bookings?status=pending" class="sidebar-link">
+          <span class="sidebar-icon">&#9203;</span> Pending
+        </a>
+        <a href="/admin/bookings?status=accepted" class="sidebar-link">
+          <span class="sidebar-icon">&#9989;</span> Accepted
+        </a>
+        <a href="/admin/bookings?status=rejected" class="sidebar-link">
+          <span class="sidebar-icon">&#10060;</span> Rejected / Cancelled
+        </a>
+        <div class="sidebar-divider"></div>
+        <a href="/admin/calendar" class="sidebar-link">
+          <span class="sidebar-icon">&#128197;</span> Calendar
+        </a>
+        <a href="/admin/blocked-dates" class="sidebar-link">
+          <span class="sidebar-icon">&#128683;</span> Blocked Dates
+        </a>
+        <a href="/admin/services" class="sidebar-link">
+          <span class="sidebar-icon">&#128736;</span> Services
+        </a>
+        <a href="/admin/settings" class="sidebar-link">
+          <span class="sidebar-icon">&#9881;</span> Settings
+        </a>
+        <div class="sidebar-divider"></div>
+        <a href="/admin/logout" class="sidebar-link">
+          <span class="sidebar-icon">&#128682;</span> Logout
+        </a>
+        <a href="/" class="sidebar-link" target="_blank">
+          <span class="sidebar-icon">&#8592;</span> Back to Site
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <header class="admin-header">
+        <button class="admin-sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+          <span></span><span></span><span></span>
+        </button>
+        <h2 class="admin-header-title">Booking Details</h2>
+        <div class="admin-header-right">
+          <span class="admin-user-email"><%= admin ? admin.email : '' %></span>
+          <a href="/admin/logout" class="btn btn-secondary btn-sm">Logout</a>
+        </div>
+      </header>
+
+      <div class="admin-content">
+        <!-- Back Button -->
+        <a href="/admin/bookings" class="btn btn-secondary btn-sm back-link">&larr; Back to Bookings</a>
+
+        <!-- Booking Header -->
+        <div class="booking-detail-header">
+          <div>
+            <h1>SAB-<%= booking.bookingId || booking._id.toString().slice(-6).toUpperCase() %></h1>
+            <p class="text-muted">Created on <%= new Date(booking.createdAt).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+          </div>
+          <span class="badge badge-<%= booking.status %> badge-lg"><%= booking.status.charAt(0).toUpperCase() + booking.status.slice(1) %></span>
+        </div>
+
+        <!-- Detail Cards -->
+        <div class="grid-2 booking-detail">
+          <!-- Customer Information -->
+          <div class="card">
+            <h3 class="detail-card-title">&#128100; Customer Information</h3>
+            <div class="detail-list">
+              <div class="detail-item">
+                <span class="detail-label">Full Name</span>
+                <span class="detail-value"><%= booking.customerName %></span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Email</span>
+                <span class="detail-value"><a href="mailto:<%= booking.customerEmail %>"><%= booking.customerEmail %></a></span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Phone</span>
+                <span class="detail-value"><a href="tel:<%= booking.customerPhone %>"><%= booking.customerPhone %></a></span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Company</span>
+                <span class="detail-value"><%= booking.customerCompany || '—' %></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Appointment Details -->
+          <div class="card">
+            <h3 class="detail-card-title">&#128197; Appointment Details</h3>
+            <div class="detail-list">
+              <div class="detail-item">
+                <span class="detail-label">Service</span>
+                <span class="detail-value"><%= booking.service ? booking.service.name : 'N/A' %></span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Date</span>
+                <span class="detail-value"><%= new Date(booking.appointmentDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Time</span>
+                <span class="detail-value"><%= booking.appointmentTime %></span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Submitted</span>
+                <span class="detail-value"><%= new Date(booking.createdAt).toLocaleString('en-US') %></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Project Description -->
+        <div class="card">
+          <h3 class="detail-card-title">&#128221; Project Description</h3>
+          <div class="detail-description">
+            <p><%= booking.projectDescription || 'No project description provided.' %></p>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <% if (booking.status === 'pending') { %>
+          <div class="booking-actions card">
+            <h3 class="detail-card-title">&#9889; Review Actions</h3>
+            <p class="text-muted" style="margin-bottom: 1rem; font-size: 0.9rem;">Reviewing this request will automatically trigger status notifications via Google Gmail API.</p>
+            <div class="action-buttons">
+              <button type="button" class="btn btn-success" onclick="document.getElementById('acceptModal').classList.add('show')">&#10003; Accept Appointment</button>
+              <button type="button" class="btn btn-danger" onclick="document.getElementById('rejectModal').classList.add('show')">&#10007; Reject Appointment</button>
+            </div>
+          </div>
+        <% } else if (booking.status === 'accepted') { %>
+          <div class="booking-actions card">
+            <h3 class="detail-card-title">&#9889; Actions</h3>
+            <div class="action-buttons">
+              <button type="button" class="btn btn-danger" onclick="document.getElementById('cancelModal').classList.add('show')">&#10007; Cancel Appointment</button>
+            </div>
+          </div>
+        <% } %>
+
+        <% if (booking.status === 'rejected' && booking.rejectionReason) { %>
+          <div class="card status-reason-card">
+            <h3 class="detail-card-title">&#10060; Rejection Details</h3>
+            <div class="detail-list">
+              <div class="detail-item">
+                <span class="detail-label">Reason</span>
+                <span class="detail-value"><%= booking.rejectionReason %></span>
+              </div>
+              <% if (booking.rejectedAt) { %>
+                <div class="detail-item">
+                  <span class="detail-label">Rejected At</span>
+                  <span class="detail-value"><%= new Date(booking.rejectedAt).toLocaleString('en-US') %></span>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        <% } %>
+
+        <% if (booking.status === 'cancelled' && booking.cancellationReason) { %>
+          <div class="card status-reason-card">
+            <h3 class="detail-card-title">&#10060; Cancellation Details</h3>
+            <div class="detail-list">
+              <div class="detail-item">
+                <span class="detail-label">Reason</span>
+                <span class="detail-value"><%= booking.cancellationReason %></span>
+              </div>
+              <% if (booking.cancelledAt) { %>
+                <div class="detail-item">
+                  <span class="detail-label">Cancelled At</span>
+                  <span class="detail-value"><%= new Date(booking.cancelledAt).toLocaleString('en-US') %></span>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        <% } %>
+
+        <!-- Booking Timeline -->
+        <div class="card">
+          <h3 class="detail-card-title">&#128339; Booking Timeline</h3>
+          <div class="booking-timeline">
+            <div class="timeline-item">
+              <div class="timeline-dot active"></div>
+              <div class="timeline-content">
+                <strong>Booking Submitted</strong>
+                <span><%= new Date(booking.createdAt).toLocaleString('en-US') %></span>
+              </div>
+            </div>
+            <% if (booking.status === 'accepted' || booking.acceptedAt) { %>
+              <div class="timeline-item">
+                <div class="timeline-dot accepted"></div>
+                <div class="timeline-content">
+                  <strong>Appointment Accepted</strong>
+                  <span><%= booking.acceptedAt ? new Date(booking.acceptedAt).toLocaleString('en-US') : '' %></span>
+                </div>
+              </div>
+            <% } %>
+            <% if (booking.status === 'rejected') { %>
+              <div class="timeline-item">
+                <div class="timeline-dot rejected"></div>
+                <div class="timeline-content">
+                  <strong>Appointment Rejected</strong>
+                  <span><%= booking.rejectedAt ? new Date(booking.rejectedAt).toLocaleString('en-US') : '' %></span>
+                </div>
+              </div>
+            <% } %>
+            <% if (booking.status === 'cancelled') { %>
+              <div class="timeline-item">
+                <div class="timeline-dot cancelled"></div>
+                <div class="timeline-content">
+                  <strong>Appointment Cancelled</strong>
+                  <span><%= booking.cancelledAt ? new Date(booking.cancelledAt).toLocaleString('en-US') : '' %></span>
+                </div>
+              </div>
+            <% } %>
+          </div>
+        </div>
+        <!-- Email Delivery Logs -->
+        <div class="card">
+          <h3 class="detail-card-title">&#9993; Email Notification History</h3>
+          <% if (typeof emailLogs !== 'undefined' && emailLogs && emailLogs.length > 0) { %>
+            <div class="table-responsive">
+              <table class="data-table" style="font-size: 0.88rem;">
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    <th>Recipient</th>
+                    <th>Status</th>
+                    <th>Message ID</th>
+                    <th>Dispatched At</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% emailLogs.forEach(function(log) { %>
+                    <tr>
+                      <td>
+                        <strong><%= (log.type || 'general').replace(/_/g, ' ').toUpperCase() %></strong>
+                      </td>
+                      <td><%= log.to %></td>
+                      <td>
+                        <% if (log.status === 'sent') { %>
+                          <span class="badge badge-accepted">&#10003; Sent</span>
+                        <% } else if (log.status === 'skipped_duplicate') { %>
+                          <span class="badge badge-pending">Skipped (Duplicate)</span>
+                        <% } else { %>
+                          <span class="badge badge-rejected" title="<%= log.error || 'Failed' %>">&#10007; <%= log.status || 'Failed' %></span>
+                        <% } %>
+                      </td>
+                      <td><code style="font-size: 0.8rem; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;"><%= log.messageId ? log.messageId.slice(0, 16) + '...' : '—' %></code></td>
+                      <td><%= new Date(log.sentAt).toLocaleString('en-US') %></td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          <% } else { %>
+            <div class="admin-empty-state" style="padding: 1.5rem;">
+              <p>No email logs found for this reference ID.</p>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Accept Modal -->
+  <div class="modal" id="acceptModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Accept Appointment</h3>
+        <button class="modal-close" onclick="document.getElementById('acceptModal').classList.remove('show')">&times;</button>
+      </div>
+      <form action="/admin/bookings/<%= booking._id %>/accept" method="POST">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div class="modal-body">
+          <p>Are you sure you want to approve this appointment consultation?</p>
+          <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 12px; border-radius: 6px; margin: 12px 0; font-size: 0.9rem;">
+            <strong>Customer:</strong> <%= booking.customerName %> (<%= booking.customerEmail %>)<br>
+            <strong>Date & Time:</strong> <%= new Date(booking.appointmentDate).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) %> at <%= booking.appointmentTime %><br>
+            <span style="color: #166534; font-size: 0.85rem; display: block; margin-top: 4px;">&#10003; An official confirmation email will be automatically sent to the customer.</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="document.getElementById('acceptModal').classList.remove('show')">Cancel</button>
+          <button type="submit" class="btn btn-success">&#10003; Confirm & Accept</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Reject Modal -->
+  <div class="modal" id="rejectModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Reject Appointment</h3>
+        <button class="modal-close" onclick="document.getElementById('rejectModal').classList.remove('show')">&times;</button>
+      </div>
+      <form action="/admin/bookings/<%= booking._id %>/reject" method="POST">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div class="modal-body">
+          <p>Are you sure you want to reject this appointment? Please provide a reason:</p>
+          <div class="form-group">
+            <label for="rejectionReason" class="form-label">Reason for Rejection <span class="required">*</span></label>
+            <textarea id="rejectionReason" name="reason" class="form-textarea" rows="4" placeholder="Enter the reason for rejecting this appointment..." required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="document.getElementById('rejectModal').classList.remove('show')">Cancel</button>
+          <button type="submit" class="btn btn-danger">Reject Appointment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Cancel Modal -->
+  <div class="modal" id="cancelModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Cancel Appointment</h3>
+        <button class="modal-close" onclick="document.getElementById('cancelModal').classList.remove('show')">&times;</button>
+      </div>
+      <form action="/admin/bookings/<%= booking._id %>/cancel" method="POST">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div class="modal-body">
+          <p>Are you sure you want to cancel this accepted appointment? Please provide a reason:</p>
+          <div class="form-group">
+            <label for="cancellationReason" class="form-label">Reason for Cancellation <span class="required">*</span></label>
+            <textarea id="cancellationReason" name="reason" class="form-textarea" rows="4" placeholder="Enter the reason for cancelling this appointment..." required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="document.getElementById('cancelModal').classList.remove('show')">Go Back</button>
+          <button type="submit" class="btn btn-danger">Cancel Appointment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

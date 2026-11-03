@@ -1,0 +1,123 @@
+<%- include('partials/header') %>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <h1 class="hero-title">Transform Your Ideas Into <span class="highlight">Powerful Software</span> Solutions</h1>
+        <p class="hero-subtitle">Book a consultation with our expert developers and designers. We'll help you plan, build, and launch software that drives real results for your business.</p>
+        <div class="hero-actions">
+          <a href="/book" class="btn btn-primary btn-lg">Book a Consultation</a>
+          <a href="/services" class="btn btn-secondary btn-lg">Our Services</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-shape">
+          <div class="hero-shape-inner">
+            <span class="hero-icon">&#128187;</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services Overview -->
+  <section class="section section-services">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Our Services</h2>
+        <p class="section-subtitle">Comprehensive software solutions tailored to your business needs</p>
+      </div>
+      <div class="grid-3">
+        <% if (services && services.length > 0) { %>
+          <% services.forEach(function(service) { %>
+            <div class="service-card card">
+              <div class="service-card-icon"><%= service.icon || '&#128736;' %></div>
+              <h3 class="service-card-title"><%= service.name %></h3>
+              <p class="service-card-desc"><%= service.description %></p>
+              <a href="/book?service=<%= service._id %>" class="btn btn-secondary btn-sm">Book Now &rarr;</a>
+            </div>
+          <% }); %>
+        <% } else { %>
+          <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 2rem;">
+            <p>Our services are being updated. Please check back soon!</p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="section section-how-it-works">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-subtitle">Book your consultation in three simple steps</p>
+      </div>
+      <div class="grid-3">
+        <div class="step-card card">
+          <div class="step-number">1</div>
+          <div class="step-icon">&#128203;</div>
+          <h3 class="step-title">Choose a Service</h3>
+          <p class="step-desc">Browse our range of software development and consulting services and select the one that fits your needs.</p>
+        </div>
+        <div class="step-card card">
+          <div class="step-number">2</div>
+          <div class="step-icon">&#128197;</div>
+          <h3 class="step-title">Pick a Time</h3>
+          <p class="step-desc">Select a convenient date and time from our interactive calendar. We offer flexible scheduling options.</p>
+        </div>
+        <div class="step-card card">
+          <div class="step-number">3</div>
+          <div class="step-icon">&#9989;</div>
+          <h3 class="step-title">Get Confirmed</h3>
+          <p class="step-desc">Receive your booking confirmation and our team will review and approve your consultation request promptly.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why Choose Us -->
+  <section class="section section-why-us">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Why Choose Us</h2>
+        <p class="section-subtitle">We're committed to delivering excellence at every stage</p>
+      </div>
+      <div class="grid-4">
+        <div class="feature-card card">
+          <div class="feature-icon">&#128101;</div>
+          <h3 class="feature-title">Expert Team</h3>
+          <p class="feature-desc">Our seasoned developers and designers bring years of industry experience to every project.</p>
+        </div>
+        <div class="feature-card card">
+          <div class="feature-icon">&#127942;</div>
+          <h3 class="feature-title">Quality Delivery</h3>
+          <p class="feature-desc">We adhere to the highest standards of code quality, testing, and deployment best practices.</p>
+        </div>
+        <div class="feature-card card">
+          <div class="feature-icon">&#128270;</div>
+          <h3 class="feature-title">Transparent Process</h3>
+          <p class="feature-desc">Stay informed at every step with clear communication, milestones, and regular progress updates.</p>
+        </div>
+        <div class="feature-card card">
+          <div class="feature-icon">&#128588;</div>
+          <h3 class="feature-title">Ongoing Support</h3>
+          <p class="feature-desc">Our relationship doesn't end at launch. We provide continued maintenance and dedicated support.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="section section-cta">
+    <div class="container">
+      <div class="cta-content">
+        <h2 class="cta-title">Ready to Start Your Project?</h2>
+        <p class="cta-subtitle">Let's discuss your vision and turn it into reality. Book a free consultation with our experts today.</p>
+        <a href="/book" class="btn btn-primary btn-lg">Book Your Consultation</a>
+      </div>
+    </div>
+  </section>
+
+<%- include('partials/footer') %>

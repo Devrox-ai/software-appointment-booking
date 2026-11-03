@@ -1,0 +1,88 @@
+<%- include('../partials/header') %>
+
+  <!-- Success Section -->
+  <section class="section success-section">
+    <div class="container">
+      <div class="success-content">
+        <div class="success-icon">&#10003;</div>
+        <h1 class="success-title">Appointment Request Submitted!</h1>
+        <p class="success-reference">Your booking reference: <strong>SAB-<%= booking.bookingId || booking._id.toString().slice(-6).toUpperCase() %></strong></p>
+        <div class="success-status" style="margin: 1rem 0;">
+          <span class="badge badge-pending badge-lg">&#9203; Pending Review</span>
+        </div>
+        <p class="success-message" style="max-width: 580px; margin: 0 auto 1.5rem; line-height: 1.6;">
+          Your appointment request has been safely received and is pending administrator review.
+        </p>
+
+        <!-- Email Notification Notice -->
+        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px 18px; max-width: 650px; margin: 0 auto 2rem; text-align: left; font-size: 0.92rem; color: #1e40af;">
+          <strong>&#9993; Email Notification Sent:</strong>
+          <p style="margin: 4px 0 0; color: #3b82f6; font-size: 0.88rem; line-height: 1.5;">
+            A confirmation receipt has been sent to <strong><%= booking.customerEmail %></strong>. If you do not see it in your Inbox within a few minutes, please check your Spam or Junk folder and mark it as <em>"Not Spam"</em> so our team's upcoming approval email reaches you.
+          </p>
+        </div>
+
+        <!-- Booking Summary -->
+        <div class="card booking-summary-card">
+          <h3>Booking Summary</h3>
+          <div class="booking-summary">
+            <div class="summary-row">
+              <span class="summary-label">Service</span>
+              <span class="summary-value"><%= booking.service ? booking.service.name : 'N/A' %></span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Date</span>
+              <span class="summary-value"><%= new Date(booking.appointmentDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Time</span>
+              <span class="summary-value"><%= booking.appointmentTime %></span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Name</span>
+              <span class="summary-value"><%= booking.customerName %></span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Email</span>
+              <span class="summary-value"><%= booking.customerEmail %></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- What Happens Next -->
+        <div class="card next-steps-card">
+          <h3>What Happens Next?</h3>
+          <div class="next-steps">
+            <div class="next-step">
+              <div class="next-step-number">1</div>
+              <div class="next-step-content">
+                <h4>Review</h4>
+                <p>Our team will review your appointment request within 24 hours.</p>
+              </div>
+            </div>
+            <div class="next-step">
+              <div class="next-step-number">2</div>
+              <div class="next-step-content">
+                <h4>Confirmation</h4>
+                <p>You'll receive an email confirmation once your appointment is approved.</p>
+              </div>
+            </div>
+            <div class="next-step">
+              <div class="next-step-number">3</div>
+              <div class="next-step-content">
+                <h4>Consultation</h4>
+                <p>Attend your consultation at the scheduled date and time. We'll discuss your project in detail.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 1.5rem;">
+          <a href="/" class="btn btn-secondary btn-lg">Back to Home</a>
+          <a href="/book" class="btn btn-primary btn-lg">Book Another Consultation</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+<%- include('../partials/footer') %>

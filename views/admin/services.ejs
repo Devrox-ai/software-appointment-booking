@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | <%= settings.companyName %> Admin</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="adminSidebar">
+      <div class="sidebar-brand">
+        <span class="nav-brand-icon">&#9670;</span>
+        <span><%= settings.companyName %></span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/admin/dashboard" class="sidebar-link">
+          <span class="sidebar-icon">&#128200;</span> Dashboard
+        </a>
+        <a href="/admin/bookings" class="sidebar-link">
+          <span class="sidebar-icon">&#128203;</span> All Bookings
+        </a>
+        <a href="/admin/bookings?status=pending" class="sidebar-link">
+          <span class="sidebar-icon">&#9203;</span> Pending
+        </a>
+        <a href="/admin/bookings?status=accepted" class="sidebar-link">
+          <span class="sidebar-icon">&#9989;</span> Accepted
+        </a>
+        <a href="/admin/bookings?status=rejected" class="sidebar-link">
+          <span class="sidebar-icon">&#10060;</span> Rejected / Cancelled
+        </a>
+        <div class="sidebar-divider"></div>
+        <a href="/admin/calendar" class="sidebar-link">
+          <span class="sidebar-icon">&#128197;</span> Calendar
+        </a>
+        <a href="/admin/blocked-dates" class="sidebar-link">
+          <span class="sidebar-icon">&#128683;</span> Blocked Dates
+        </a>
+        <a href="/admin/services" class="sidebar-link active">
+          <span class="sidebar-icon">&#128736;</span> Services
+        </a>
+        <a href="/admin/settings" class="sidebar-link">
+          <span class="sidebar-icon">&#9881;</span> Settings
+        </a>
+        <div class="sidebar-divider"></div>
+        <a href="/admin/logout" class="sidebar-link">
+          <span class="sidebar-icon">&#128682;</span> Logout
+        </a>
+        <a href="/" class="sidebar-link" target="_blank">
+          <span class="sidebar-icon">&#8592;</span> Back to Site
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <header class="admin-header">
+        <button class="admin-sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+          <span></span><span></span><span></span>
+        </button>
+        <h2 class="admin-header-title">Manage Services</h2>
+        <div class="admin-header-right">
+          <span class="admin-user-email"><%= admin ? admin.email : '' %></span>
+          <a href="/admin/logout" class="btn btn-secondary btn-sm">Logout</a>
+        </div>
+      </header>
+
+      <div class="admin-content">
+        <!-- Add Service Button -->
+        <div class="admin-actions-bar">
+          <button type="button" class="btn btn-primary" onclick="document.getElementById('addServiceModal').classList.add('show')">&#43; Add New Service</button>
+        </div>
+
+        <!-- Services Table -->
+        <div class="card admin-table-card">
+          <% if (services && services.length > 0) { %>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Icon</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% services.forEach(function(service, index) { %>
+                    <tr>
+                      <td class="service-icon-cell"><%= service.icon || '&#128736;' %></td>
+                      <td><strong><%= service.name %></strong></td>
+                      <td class="service-desc-cell"><%= service.description %></td>
+                      <td>
+                        <form action="/admin/services/<%= service._id %>/toggle" method="POST" style="display: inline;">
+                          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                          <button type="submit" class="badge <%= service.active !== false ? 'badge-accepted' : 'badge-rejected' %>" style="cursor: pointer; border: none;">
+                            <%= service.active !== false ? 'Active' : 'Inactive' %>
+                          </button>
+                        </form>
+                      </td>
+                      <td>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="openEditModal('<%= service._id %>', '<%= service.name.replace(/'/g, "\\'") %>', '<%= service.description.replace(/'/g, "\\'") %>', '<%= service.icon || '' %>')">Edit</button>
+                      </td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          <% } else { %>
+            <div class="admin-empty-state">
+              <div class="empty-icon">&#128736;</div>
+              <h3>No Services Yet</h3>
+              <p>Create your first service to start accepting appointment bookings.</p>
+              <button type="button" class="btn btn-primary" onclick="document.getElementById('addServiceModal').classList.add('show')">Add Service</button>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add Service Modal -->
+  <div class="modal" id="addServiceModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Add New Service</h3>
+        <button class="modal-close" onclick="document.getElementById('addServiceModal').classList.remove('show')">&times;</button>
+      </div>
+      <form action="/admin/services" method="POST">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="addServiceName" class="form-label">Service Name <span class="required">*</span></label>
+            <input type="text" id="addServiceName" name="name" class="form-input" placeholder="e.g., Web Development" required>
+          </div>
+          <div class="form-group">
+            <label for="addServiceIcon" class="form-label">Icon (Emoji)</label>
+            <input type="text" id="addServiceIcon" name="icon" class="form-input" placeholder="e.g., 💻" maxlength="10">
+          </div>
+          <div class="form-group">
+            <label for="addServiceDescription" class="form-label">Description <span class="required">*</span></label>
+            <textarea id="addServiceDescription" name="description" class="form-textarea" rows="4" placeholder="Describe the service..." required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="document.getElementById('addServiceModal').classList.remove('show')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Service</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Service Modal -->
+  <div class="modal" id="editServiceModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Edit Service</h3>
+        <button class="modal-close" onclick="document.getElementById('editServiceModal').classList.remove('show')">&times;</button>
+      </div>
+      <form id="editServiceForm" action="/admin/services/" method="POST">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="_method" value="PUT">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="editServiceName" class="form-label">Service Name <span class="required">*</span></label>
+            <input type="text" id="editServiceName" name="name" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label for="editServiceIcon" class="form-label">Icon (Emoji)</label>
+            <input type="text" id="editServiceIcon" name="icon" class="form-input" maxlength="10">
+          </div>
+          <div class="form-group">
+            <label for="editServiceDescription" class="form-label">Description <span class="required">*</span></label>
+            <textarea id="editServiceDescription" name="description" class="form-textarea" rows="4" required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="document.getElementById('editServiceModal').classList.remove('show')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/admin.js"></script>
+  <script>
+    function openEditModal(id, name, description, icon) {
+      document.getElementById('editServiceForm').action = '/admin/services/' + id;
+      document.getElementById('editServiceName').value = name;
+      document.getElementById('editServiceDescription').value = description;
+      document.getElementById('editServiceIcon').value = icon;
+      document.getElementById('editServiceModal').classList.add('show');
+    }
+  </script>
+</body>
+</html>

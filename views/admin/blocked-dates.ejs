@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | <%= settings.companyName %> Admin</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="adminSidebar">
+      <div class="sidebar-brand">
+        <span class="nav-brand-icon">&#9670;</span>
+        <span><%= settings.companyName %></span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/admin/dashboard" class="sidebar-link">
+          <span class="sidebar-icon">&#128200;</span> Dashboard
+        </a>
+        <a href="/admin/bookings" class="sidebar-link">
+          <span class="sidebar-icon">&#128203;</span> All Bookings
+        </a>
+        <a href="/admin/bookings?status=pending" class="sidebar-link">
+          <span class="sidebar-icon">&#9203;</span> Pending
+        </a>
+        <a href="/admin/bookings?status=accepted" class="sidebar-link">
+          <span class="sidebar-icon">&#9989;</span> Accepted
+        </a>
+        <a href="/admin/bookings?status=rejected" class="sidebar-link">
+          <span class="sidebar-icon">&#10060;</span> Rejected / Cancelled
+        </a>
+        <div class="sidebar-divider"></div>
+        <a href="/admin/calendar" class="sidebar-link">
+          <span class="sidebar-icon">&#128197;</span> Calendar
+        </a>
+        <a href="/admin/blocked-dates" class="sidebar-link active">
+          <span class="sidebar-icon">&#128683;</span> Blocked Dates
+        </a>
+        <a href="/admin/services" class="sidebar-link">
+          <span class="sidebar-icon">&#128736;</span> Services
+        </a>
+        <a href="/admin/settings" class="sidebar-link">
+          <span class="sidebar-icon">&#9881;</span> Settings
+        </a>
+        <div class="sidebar-divider"></div>
+        <a href="/admin/logout" class="sidebar-link">
+          <span class="sidebar-icon">&#128682;</span> Logout
+        </a>
+        <a href="/" class="sidebar-link" target="_blank">
+          <span class="sidebar-icon">&#8592;</span> Back to Site
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <header class="admin-header">
+        <button class="admin-sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+          <span></span><span></span><span></span>
+        </button>
+        <h2 class="admin-header-title">Blocked Dates</h2>
+        <div class="admin-header-right">
+          <span class="admin-user-email"><%= admin ? admin.email : '' %></span>
+          <a href="/admin/logout" class="btn btn-secondary btn-sm">Logout</a>
+        </div>
+      </header>
+
+      <div class="admin-content">
+        <!-- Block a Date Form -->
+        <div class="card">
+          <h3 class="detail-card-title">&#128683; Block a Date</h3>
+          <form action="/admin/block-date" method="POST" class="block-date-form">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <div class="grid-3 block-date-grid">
+              <div class="form-group">
+                <label for="blockDate" class="form-label">Date <span class="required">*</span></label>
+                <input type="date" id="blockDate" name="date" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label for="blockReason" class="form-label">Reason</label>
+                <input type="text" id="blockReason" name="reason" class="form-input" placeholder="e.g., Holiday, Maintenance...">
+              </div>
+              <div class="form-group block-date-submit">
+                <button type="submit" class="btn btn-danger">Block Date</button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Blocked Dates Table -->
+        <div class="card admin-table-card">
+          <div class="admin-card-header">
+            <h3>Currently Blocked Dates</h3>
+          </div>
+          <% if (blockedDates && blockedDates.length > 0) { %>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Reason</th>
+                    <th>Blocked At</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% blockedDates.forEach(function(blocked) { %>
+                    <tr>
+                      <td><strong><%= new Date(blocked.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></strong></td>
+                      <td><%= blocked.reason || '—' %></td>
+                      <td><%= blocked.createdAt ? new Date(blocked.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—' %></td>
+                      <td>
+                        <form action="/admin/unblock-date" method="POST" style="display: inline;">
+                          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                          <input type="hidden" name="date" value="<%= blocked.date %>">
+                          <button type="submit" class="btn btn-success btn-sm">Unblock</button>
+                        </form>
+                      </td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          <% } else { %>
+            <div class="admin-empty-state">
+              <div class="empty-icon">&#128197;</div>
+              <h3>No Blocked Dates</h3>
+              <p>There are currently no blocked dates. Use the form above to block a date.</p>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

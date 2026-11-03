@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | <%= settings.companyName %> Admin</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="adminSidebar">
+      <div class="sidebar-brand">
+        <span class="nav-brand-icon">&#9670;</span>
+        <span><%= settings.companyName %></span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/admin/dashboard" class="sidebar-link active">
+          <span class="sidebar-icon">&#128200;</span> Dashboard
+        </a>
+        <a href="/admin/bookings" class="sidebar-link">
+          <span class="sidebar-icon">&#128203;</span> All Bookings
+        </a>
+        <a href="/admin/bookings?status=pending" class="sidebar-link">
+          <span class="sidebar-icon">&#9203;</span> Pending
+        </a>
+        <a href="/admin/bookings?status=accepted" class="sidebar-link">
+          <span class="sidebar-icon">&#9989;</span> Accepted
+        </a>
+        <a href="/admin/bookings?status=rejected" class="sidebar-link">
+          <span class="sidebar-icon">&#10060;</span> Rejected / Cancelled
+        </a>
+        <div class="sidebar-divider"></div>
+        <a href="/admin/calendar" class="sidebar-link">
+          <span class="sidebar-icon">&#128197;</span> Calendar
+        </a>
+        <a href="/admin/blocked-dates" class="sidebar-link">
+          <span class="sidebar-icon">&#128683;</span> Blocked Dates
+        </a>
+        <a href="/admin/services" class="sidebar-link">
+          <span class="sidebar-icon">&#128736;</span> Services
+        </a>
+        <a href="/admin/settings" class="sidebar-link">
+          <span class="sidebar-icon">&#9881;</span> Settings
+        </a>
+        <div class="sidebar-divider"></div>
+        <a href="/admin/logout" class="sidebar-link">
+          <span class="sidebar-icon">&#128682;</span> Logout
+        </a>
+        <a href="/" class="sidebar-link" target="_blank">
+          <span class="sidebar-icon">&#8592;</span> Back to Site
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <header class="admin-header">
+        <button class="admin-sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+          <span></span><span></span><span></span>
+        </button>
+        <h2 class="admin-header-title">Dashboard</h2>
+        <div class="admin-header-right">
+          <span class="admin-user-email"><%= admin ? admin.email : '' %></span>
+          <a href="/admin/logout" class="btn btn-secondary btn-sm">Logout</a>
+        </div>
+      </header>
+
+      <div class="admin-content">
+        <!-- Welcome -->
+        <div class="admin-welcome">
+          <h1>Welcome back<%= admin && admin.email ? ', ' + admin.email.split('@')[0] : '' %>!</h1>
+          <p>Here's an overview of your appointments and activity.</p>
+        </div>
+
+        <!-- Stat Cards -->
+        <div class="grid-4 stats-grid">
+          <div class="stat-card card">
+            <div class="stat-card-icon stat-total">&#128203;</div>
+            <div class="stat-card-info">
+              <h3 class="stat-card-value"><%= stats.total || 0 %></h3>
+              <p class="stat-card-label">Total Bookings</p>
+            </div>
+          </div>
+          <div class="stat-card card">
+            <div class="stat-card-icon stat-pending">&#9203;</div>
+            <div class="stat-card-info">
+              <h3 class="stat-card-value"><%= stats.pending || 0 %></h3>
+              <p class="stat-card-label">Pending</p>
+            </div>
+          </div>
+          <div class="stat-card card">
+            <div class="stat-card-icon stat-accepted">&#9989;</div>
+            <div class="stat-card-info">
+              <h3 class="stat-card-value"><%= stats.accepted || 0 %></h3>
+              <p class="stat-card-label">Accepted</p>
+            </div>
+          </div>
+          <div class="stat-card card">
+            <div class="stat-card-icon stat-rejected">&#10060;</div>
+            <div class="stat-card-info">
+              <h3 class="stat-card-value"><%= (stats.rejected || 0) + (stats.cancelled || 0) %></h3>
+              <p class="stat-card-label">Rejected / Cancelled</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Today's Appointments -->
+        <div class="card admin-table-card">
+          <div class="admin-card-header">
+            <h3>Today's Appointments</h3>
+          </div>
+          <% if (todayBookings && todayBookings.length > 0) { %>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Booking ID</th>
+                    <th>Customer</th>
+                    <th>Service</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% todayBookings.forEach(function(booking) { %>
+                    <tr>
+                      <td><strong>SAB-<%= booking.bookingId || booking._id.toString().slice(-6).toUpperCase() %></strong></td>
+                      <td><%= booking.customerName %></td>
+                      <td><%= booking.service ? booking.service.name : 'N/A' %></td>
+                      <td><%= booking.appointmentTime %></td>
+                      <td>
+                        <span class="badge badge-<%= booking.status %>"><%= booking.status.charAt(0).toUpperCase() + booking.status.slice(1) %></span>
+                      </td>
+                      <td>
+                        <a href="/admin/bookings/<%= booking._id %>" class="btn btn-secondary btn-sm">View</a>
+                      </td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          <% } else { %>
+            <div class="admin-empty-state">
+              <p>No appointments scheduled for today.</p>
+            </div>
+          <% } %>
+        </div>
+
+        <!-- Upcoming Appointments -->
+        <div class="card admin-table-card">
+          <div class="admin-card-header">
+            <h3>Upcoming Consultations</h3>
+            <span class="badge badge-accepted"><%= upcomingBookings ? upcomingBookings.length : 0 %> Upcoming</span>
+          </div>
+          <% if (upcomingBookings && upcomingBookings.length > 0) { %>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Booking ID</th>
+                    <th>Customer</th>
+                    <th>Service</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% upcomingBookings.forEach(function(booking) { %>
+                    <tr>
+                      <td><strong>SAB-<%= booking.bookingId || booking._id.toString().slice(-6).toUpperCase() %></strong></td>
+                      <td><%= booking.customerName %></td>
+                      <td><%= booking.service ? booking.service.name : 'N/A' %></td>
+                      <td><%= new Date(booking.appointmentDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></td>
+                      <td><%= booking.appointmentTime %></td>
+                      <td>
+                        <span class="badge badge-<%= booking.status %>"><%= booking.status.charAt(0).toUpperCase() + booking.status.slice(1) %></span>
+                      </td>
+                      <td>
+                        <a href="/admin/bookings/<%= booking._id %>" class="btn btn-secondary btn-sm">View Details</a>
+                      </td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          <% } else { %>
+            <div class="admin-empty-state">
+              <p>No upcoming appointments found.</p>
+            </div>
+          <% } %>
+        </div>
+
+        <!-- Recent Bookings -->
+        <div class="card admin-table-card">
+          <div class="admin-card-header">
+            <h3>Recent Bookings</h3>
+            <a href="/admin/bookings" class="btn btn-secondary btn-sm">View All</a>
+          </div>
+          <% if (recentBookings && recentBookings.length > 0) { %>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Booking ID</th>
+                    <th>Customer</th>
+                    <th>Service</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% recentBookings.forEach(function(booking) { %>
+                    <tr>
+                      <td><strong>SAB-<%= booking.bookingId || booking._id.toString().slice(-6).toUpperCase() %></strong></td>
+                      <td><%= booking.customerName %></td>
+                      <td><%= booking.service ? booking.service.name : 'N/A' %></td>
+                      <td><%= new Date(booking.appointmentDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></td>
+                      <td><%= booking.appointmentTime %></td>
+                      <td>
+                        <span class="badge badge-<%= booking.status %>"><%= booking.status.charAt(0).toUpperCase() + booking.status.slice(1) %></span>
+                      </td>
+                      <td>
+                        <a href="/admin/bookings/<%= booking._id %>" class="btn btn-secondary btn-sm">View</a>
+                      </td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          <% } else { %>
+            <div class="admin-empty-state">
+              <p>No bookings yet.</p>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

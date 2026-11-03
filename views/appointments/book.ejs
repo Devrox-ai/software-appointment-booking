@@ -1,0 +1,307 @@
+<%- include('../partials/header') %>
+
+  <!-- Page Header -->
+  <section class="page-header">
+    <div class="container">
+      <h1>Book a Software Consultation</h1>
+      <p>Schedule a 1-on-1 strategy meeting with our senior engineering team</p>
+    </div>
+  </section>
+
+  <!-- Booking Wizard Section -->
+  <section class="section" id="bookingWizardSection">
+    <div class="container" id="bookingWizardContainer">
+      <% if (typeof error !== 'undefined' && error) { %>
+        <div class="alert alert-error"><%= error %></div>
+      <% } %>
+
+      <!-- Progress Indicator Bar -->
+      <div class="booking-progress" id="bookingProgress">
+        <div class="progress-step active" data-step="1">
+          <div class="progress-step-number">1</div>
+          <div class="progress-step-label">Service</div>
+        </div>
+        <div class="progress-line"></div>
+        <div class="progress-step" data-step="2">
+          <div class="progress-step-number">2</div>
+          <div class="progress-step-label">Your Details</div>
+        </div>
+        <div class="progress-line"></div>
+        <div class="progress-step" data-step="3">
+          <div class="progress-step-number">3</div>
+          <div class="progress-step-label">Schedule</div>
+        </div>
+        <div class="progress-line"></div>
+        <div class="progress-step" data-step="4">
+          <div class="progress-step-number">4</div>
+          <div class="progress-step-label">Review & Confirm</div>
+        </div>
+      </div>
+
+      <!-- Multi-Step Form -->
+      <form id="bookingForm" action="/book" method="POST" novalidate>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="serviceId" id="serviceId" value="<%= typeof selectedService !== 'undefined' && selectedService ? selectedService : '' %>">
+        <input type="hidden" name="appointmentDate" id="appointmentDate" value="">
+        <input type="hidden" name="appointmentTime" id="appointmentTime" value="">
+
+        <!-- STEP 1: SERVICE SELECTION -->
+        <div class="booking-step" id="step1">
+          <div class="step-header-wrap">
+            <div>
+              <h2 class="step-heading">Step 1: Select a Service Category</h2>
+              <p class="step-description">Choose the software service you would like to discuss during your consultation</p>
+            </div>
+            
+            <!-- Quick Action Continue Bar (Top & Sticky when scrolled) -->
+            <div id="serviceTopActionBar" class="service-top-action-bar" style="<%= (typeof selectedService !== 'undefined' && selectedService) ? 'display: flex;' : 'display: none;' %>">
+              <div class="selected-service-pill">
+                <span class="pill-label">Selected:</span>
+                <strong id="topSelectedServiceName"><%= (typeof selectedService !== 'undefined' && selectedService) ? 'Service Selected' : 'None' %></strong>
+              </div>
+              <button type="button" class="btn btn-primary btn-next" data-next="2">Continue to Your Details &rarr;</button>
+            </div>
+          </div>
+
+          <div class="grid-3 service-selection-grid">
+            <% if (services && services.length > 0) { %>
+              <% services.forEach(function(service) { %>
+                <div class="service-card card service-selectable <%= (typeof selectedService !== 'undefined' && selectedService && selectedService.toString() === service._id.toString()) ? 'selected' : '' %>"
+                     data-service-id="<%= service._id %>"
+                     data-service-name="<%= service.name %>">
+                  <div class="service-card-icon"><%= service.icon || '&#128736;' %></div>
+                  <h3 class="service-card-title"><%= service.name %></h3>
+                  <p class="service-card-desc"><%= service.description %></p>
+                  <div class="service-card-footer">
+                    <span class="service-select-btn">Select Service</span>
+                    <div class="service-check">&#10003; Selected</div>
+                  </div>
+                </div>
+              <% }); %>
+            <% } else { %>
+              <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 2rem;">
+                <p>No software services are currently available for booking. Please contact support.</p>
+              </div>
+            <% } %>
+          </div>
+
+          <!-- Bottom Navigation for Step 1 -->
+          <div class="booking-nav">
+            <div></div>
+            <button type="button" class="btn btn-primary btn-lg btn-next" data-next="2" id="step1BottomNext">Continue to Your Details &rarr;</button>
+          </div>
+        </div>
+
+        <!-- STEP 2: CUSTOMER DETAILS -->
+        <div class="booking-step" id="step2" style="display: none;">
+          <!-- Top Service Summary Badge -->
+          <div class="selected-service-banner card">
+            <div class="banner-left">
+              <span class="banner-badge">Step 1 Completed</span>
+              <h3 class="banner-title" id="step2SelectedServiceName">Service Name</h3>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="window.bookingWizardGoTo(1)">&#9998; Change Service</button>
+          </div>
+
+          <div class="step-header-wrap">
+            <div>
+              <h2 class="step-heading">Step 2: Enter Your Project & Contact Details</h2>
+              <p class="step-description">Tell us about your team and what you aim to build</p>
+            </div>
+          </div>
+
+          <div class="booking-form-card card">
+            <div class="grid-2">
+              <div class="form-group">
+                <label for="customerName" class="form-label">Full Name <span class="required">*</span></label>
+                <input type="text" id="customerName" name="customerName" class="form-input" placeholder="e.g. John Doe" required autocomplete="name">
+                <span class="field-error-msg" id="errCustomerName"></span>
+              </div>
+              <div class="form-group">
+                <label for="customerEmail" class="form-label">Email Address <span class="required">*</span></label>
+                <input type="email" id="customerEmail" name="customerEmail" class="form-input" placeholder="e.g. john@example.com" required autocomplete="email">
+                <span class="field-error-msg" id="errCustomerEmail"></span>
+                <small class="text-muted" style="font-size: 0.8rem; display: block; margin-top: 4px;">We'll deliver appointment updates & calendar invite to this email.</small>
+              </div>
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label for="customerPhone" class="form-label">Phone Number <span class="required">*</span></label>
+                <input type="tel" id="customerPhone" name="customerPhone" class="form-input" placeholder="e.g. +91 98765 43210" required autocomplete="tel">
+                <span class="field-error-msg" id="errCustomerPhone"></span>
+              </div>
+              <div class="form-group">
+                <label for="customerCompany" class="form-label">Company / Organization <span class="optional">(Optional)</span></label>
+                <input type="text" id="customerCompany" name="customerCompany" class="form-input" placeholder="e.g. Acme Tech Solutions" autocomplete="organization">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="projectDescription" class="form-label">Project Requirements & Goals <span class="required">*</span></label>
+              <textarea id="projectDescription" name="projectDescription" class="form-textarea" rows="4" placeholder="Briefly describe your current requirements, target audience, technical challenges, or desired timeline..." required></textarea>
+              <span class="field-error-msg" id="errProjectDescription"></span>
+            </div>
+          </div>
+
+          <div class="booking-nav">
+            <button type="button" class="btn btn-secondary btn-prev" data-prev="1">&larr; Back to Services</button>
+            <button type="button" class="btn btn-primary btn-lg btn-next" data-next="3">Continue to Schedule &rarr;</button>
+          </div>
+        </div>
+
+        <!-- STEP 3: SCHEDULE APPOINTMENT -->
+        <div class="booking-step" id="step3" style="display: none;">
+          <!-- Top Service Summary Badge -->
+          <div class="selected-service-banner card">
+            <div class="banner-left">
+              <span class="banner-badge">Service &amp; Client</span>
+              <h3 class="banner-title"><span id="step3SelectedServiceName">Service</span> &bull; <span id="step3CustomerName">Client</span></h3>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="window.bookingWizardGoTo(2)">&#9998; Edit Details</button>
+          </div>
+
+          <div class="step-header-wrap">
+            <div>
+              <h2 class="step-heading">Step 3: Pick an Appointment Date & Time</h2>
+              <p class="step-description">Select your preferred date to view real-time available consultation slots</p>
+            </div>
+          </div>
+
+          <div class="grid-2 schedule-grid">
+            <!-- Calendar Card -->
+            <div class="card calendar-card">
+              <div class="calendar-card-header">
+                <h3 class="calendar-heading">Select Date</h3>
+                <span class="timezone-badge">&#128337; Asia/Kolkata (IST)</span>
+              </div>
+              <div id="datePickerCalendar" class="calendar-grid-wrap">
+                <!-- Calendar dynamically rendered by booking.js -->
+              </div>
+              <div class="calendar-legend">
+                <span class="legend-item"><span class="legend-dot dot-available"></span> Available</span>
+                <span class="legend-item"><span class="legend-dot dot-selected"></span> Selected</span>
+                <span class="legend-item"><span class="legend-dot dot-disabled"></span> Unavailable</span>
+              </div>
+            </div>
+
+            <!-- Time Slots Card -->
+            <div class="card time-slots-card">
+              <div class="time-slots-header">
+                <h3 class="time-slots-heading">Available Time Slots</h3>
+                <span id="selectedDateDisplayBadge" class="badge badge-accepted" style="display: none;">Date Selected</span>
+              </div>
+              <div id="timeSlotsContainer" class="time-slots-wrapper">
+                <div class="time-slots-placeholder">
+                  <span class="placeholder-icon">&#128197;</span>
+                  <p>Please click a highlighted date on the calendar to view available 30-minute consultation slots.</p>
+                </div>
+              </div>
+              <span class="field-error-msg" id="errAppointmentSlot" style="margin-top: 10px; display: block;"></span>
+            </div>
+          </div>
+
+          <div class="booking-nav">
+            <button type="button" class="btn btn-secondary btn-prev" data-prev="2">&larr; Back to Details</button>
+            <button type="button" class="btn btn-primary btn-lg btn-next" data-next="4">Review Booking &rarr;</button>
+          </div>
+        </div>
+
+        <!-- STEP 4: REVIEW & CONFIRM -->
+        <div class="booking-step" id="step4" style="display: none;">
+          <div class="step-header-wrap">
+            <div>
+              <h2 class="step-heading">Step 4: Review Your Consultation Details</h2>
+              <p class="step-description">Please double-check all information before final submission</p>
+            </div>
+          </div>
+
+          <div class="card booking-summary-card">
+            <!-- Service Block -->
+            <div class="review-section">
+              <div class="review-section-header">
+                <h4><span class="review-icon">&#128736;</span> Selected Software Service</h4>
+                <button type="button" class="btn-text-edit" onclick="window.bookingWizardGoTo(1)">Change</button>
+              </div>
+              <div class="review-section-content">
+                <strong id="summaryService" class="review-highlight">—</strong>
+              </div>
+            </div>
+
+            <div class="review-divider"></div>
+
+            <!-- Customer Details Block -->
+            <div class="review-section">
+              <div class="review-section-header">
+                <h4><span class="review-icon">&#128100;</span> Customer & Contact Information</h4>
+                <button type="button" class="btn-text-edit" onclick="window.bookingWizardGoTo(2)">Edit</button>
+              </div>
+              <div class="review-grid">
+                <div class="review-item">
+                  <span class="review-label">Full Name</span>
+                  <strong class="review-val" id="summaryName">—</strong>
+                </div>
+                <div class="review-item">
+                  <span class="review-label">Email Address</span>
+                  <strong class="review-val" id="summaryEmail">—</strong>
+                </div>
+                <div class="review-item">
+                  <span class="review-label">Phone Number</span>
+                  <strong class="review-val" id="summaryPhone">—</strong>
+                </div>
+                <div class="review-item">
+                  <span class="review-label">Company</span>
+                  <strong class="review-val" id="summaryCompany">—</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="review-divider"></div>
+
+            <!-- Schedule Block -->
+            <div class="review-section">
+              <div class="review-section-header">
+                <h4><span class="review-icon">&#128197;</span> Appointment Schedule</h4>
+                <button type="button" class="btn-text-edit" onclick="window.bookingWizardGoTo(3)">Reschedule</button>
+              </div>
+              <div class="review-schedule-box">
+                <div class="schedule-date-box">
+                  <span class="review-label">Date</span>
+                  <strong class="review-highlight" id="summaryDate">—</strong>
+                </div>
+                <div class="schedule-time-box">
+                  <span class="review-label">Time (IST)</span>
+                  <strong class="review-highlight" id="summaryTime">—</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="review-divider"></div>
+
+            <!-- Project Description Block -->
+            <div class="review-section">
+              <div class="review-section-header">
+                <h4><span class="review-icon">&#128221;</span> Project Requirements</h4>
+                <button type="button" class="btn-text-edit" onclick="window.bookingWizardGoTo(2)">Edit</button>
+              </div>
+              <p class="review-description-text" id="summaryDescription">—</p>
+            </div>
+          </div>
+
+          <!-- Submission Notice -->
+          <div class="booking-guarantee-note">
+            <span class="guarantee-icon">&#128274;</span>
+            <p>Once submitted, your slot will be temporarily reserved with status <strong>Pending</strong> while our technical team reviews your requirements. Confirmation email will be dispatched to your submitted address.</p>
+          </div>
+
+          <div class="booking-nav">
+            <button type="button" class="btn btn-secondary btn-prev" data-prev="3">&larr; Back to Schedule</button>
+            <button type="submit" class="btn btn-primary btn-lg btn-submit" id="btnSubmitBooking">
+              <span class="btn-text">&#10003; Confirm & Submit Consultation</span>
+              <span class="btn-spinner" style="display: none;">Submitting booking...</span>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+
+<%- include('../partials/footer') %>

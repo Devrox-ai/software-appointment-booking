@@ -1,0 +1,70 @@
+  <footer class="footer">
+    <div class="container">
+      <div class="grid-4 footer-grid">
+        <div class="footer-col">
+          <h3 class="footer-heading"><%= settings.companyName %></h3>
+          <p class="footer-text">We deliver cutting-edge software solutions tailored to your business needs. From consultation to deployment, our expert team is with you every step of the way.</p>
+          <div class="footer-social">
+            <a href="#" aria-label="Facebook" class="social-link">&#9733;</a>
+            <a href="#" aria-label="Twitter" class="social-link">&#9733;</a>
+            <a href="#" aria-label="LinkedIn" class="social-link">&#9733;</a>
+            <a href="#" aria-label="GitHub" class="social-link">&#9733;</a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4 class="footer-heading">Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/about">About Us</a></li>
+            <li><a href="/services">Services</a></li>
+            <li><a href="/book">Book Appointment</a></li>
+            <li><a href="/contact">Contact Us</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4 class="footer-heading">Services</h4>
+          <ul class="footer-links">
+            <li><a href="/services">Web Development</a></li>
+            <li><a href="/services">Mobile Apps</a></li>
+            <li><a href="/services">Cloud Solutions</a></li>
+            <li><a href="/services">UI/UX Design</a></li>
+            <li><a href="/services">IT Consulting</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4 class="footer-heading">Contact Info</h4>
+          <ul class="footer-links footer-contact">
+            <li>
+              <span class="footer-icon">&#9993;</span>
+              <a href="mailto:<%= settings.companyEmail %>"><%= settings.companyEmail %></a>
+            </li>
+            <li>
+              <span class="footer-icon">&#9742;</span>
+              <a href="tel:<%= settings.companyPhone %>"><%= settings.companyPhone %></a>
+            </li>
+            <li>
+              <span class="footer-icon">&#9873;</span>
+              <span><%= settings.companyAddress %></span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; <%= new Date().getFullYear() %> <%= settings.companyName %>. All rights reserved.</p>
+        <div class="footer-bottom-links">
+          <a href="/privacy">Privacy Policy</a>
+          <a href="/terms">Terms &amp; Conditions</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+  <% if (currentPath === '/book') { %>
+  <script src="/js/booking.js"></script>
+  <% } %>
+  <% if (currentPath && currentPath.startsWith('/admin')) { %>
+  <script src="/js/admin.js"></script>
+  <% } %>
+</body>
+</html>

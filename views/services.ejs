@@ -1,0 +1,47 @@
+<%- include('partials/header') %>
+
+  <!-- Page Header -->
+  <section class="page-header">
+    <div class="container">
+      <h1>Our Services</h1>
+      <p>Comprehensive software solutions designed to accelerate your business growth</p>
+    </div>
+  </section>
+
+  <!-- Services Grid -->
+  <section class="section">
+    <div class="container">
+      <% if (services && services.length > 0) { %>
+        <div class="grid-3">
+          <% services.forEach(function(service) { %>
+            <div class="service-card card">
+              <div class="service-card-icon"><%= service.icon || '&#128736;' %></div>
+              <h3 class="service-card-title"><%= service.name %></h3>
+              <p class="service-card-desc"><%= service.description %></p>
+              <a href="/book?service=<%= service._id %>" class="btn btn-primary btn-sm">Book Consultation &rarr;</a>
+            </div>
+          <% }); %>
+        </div>
+      <% } else { %>
+        <div class="card" style="text-align: center; padding: 3rem;">
+          <div style="font-size: 3rem; margin-bottom: 1rem;">&#128736;</div>
+          <h3>Services Coming Soon</h3>
+          <p>We're currently updating our service offerings. Please check back shortly or contact us for more information.</p>
+          <a href="/contact" class="btn btn-secondary" style="margin-top: 1rem;">Contact Us</a>
+        </div>
+      <% } %>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="section section-cta">
+    <div class="container">
+      <div class="cta-content">
+        <h2 class="cta-title">Not Sure Which Service You Need?</h2>
+        <p class="cta-subtitle">Book a free consultation and we'll help you find the best solution for your project.</p>
+        <a href="/book" class="btn btn-primary btn-lg">Book a Free Consultation</a>
+      </div>
+    </div>
+  </section>
+
+<%- include('partials/footer') %>

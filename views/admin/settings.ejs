@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | <%= settings.companyName %> Admin</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="adminSidebar">
+      <div class="sidebar-brand">
+        <span class="nav-brand-icon">&#9670;</span>
+        <span><%= settings.companyName %></span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/admin/dashboard" class="sidebar-link">
+          <span class="sidebar-icon">&#128200;</span> Dashboard
+        </a>
+        <a href="/admin/bookings" class="sidebar-link">
+          <span class="sidebar-icon">&#128203;</span> All Bookings
+        </a>
+        <a href="/admin/bookings?status=pending" class="sidebar-link">
+          <span class="sidebar-icon">&#9203;</span> Pending
+        </a>
+        <a href="/admin/bookings?status=accepted" class="sidebar-link">
+          <span class="sidebar-icon">&#9989;</span> Accepted
+        </a>
+        <a href="/admin/bookings?status=rejected" class="sidebar-link">
+          <span class="sidebar-icon">&#10060;</span> Rejected / Cancelled
+        </a>
+        <div class="sidebar-divider"></div>
+        <a href="/admin/calendar" class="sidebar-link">
+          <span class="sidebar-icon">&#128197;</span> Calendar
+        </a>
+        <a href="/admin/blocked-dates" class="sidebar-link">
+          <span class="sidebar-icon">&#128683;</span> Blocked Dates
+        </a>
+        <a href="/admin/services" class="sidebar-link">
+          <span class="sidebar-icon">&#128736;</span> Services
+        </a>
+        <a href="/admin/settings" class="sidebar-link active">
+          <span class="sidebar-icon">&#9881;</span> Settings
+        </a>
+        <div class="sidebar-divider"></div>
+        <a href="/admin/logout" class="sidebar-link">
+          <span class="sidebar-icon">&#128682;</span> Logout
+        </a>
+        <a href="/" class="sidebar-link" target="_blank">
+          <span class="sidebar-icon">&#8592;</span> Back to Site
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <header class="admin-header">
+        <button class="admin-sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+          <span></span><span></span><span></span>
+        </button>
+        <h2 class="admin-header-title">Settings</h2>
+        <div class="admin-header-right">
+          <span class="admin-user-email"><%= admin ? admin.email : '' %></span>
+          <a href="/admin/logout" class="btn btn-secondary btn-sm">Logout</a>
+        </div>
+      </header>
+
+      <div class="admin-content">
+        <% if (typeof success !== 'undefined' && success) { %>
+          <div class="alert alert-success"><%= success %></div>
+        <% } %>
+        <% if (typeof error !== 'undefined' && error) { %>
+          <div class="alert alert-error"><%= error %></div>
+        <% } %>
+
+        <form action="/admin/settings" method="POST" class="settings-form">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+          <!-- Scheduling Settings -->
+          <div class="card settings-card">
+            <h3 class="detail-card-title">&#128197; Scheduling Settings</h3>
+
+            <div class="form-group">
+              <label class="form-label">Working Days</label>
+              <div class="checkbox-group">
+                <% 
+                  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']; 
+                  const dayToNum = { 'Sunday': 0, 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6 };
+                %>
+                <% days.forEach(function(day) { %>
+                  <label class="checkbox-label">
+                    <input type="checkbox" name="workingDays" value="<%= day %>"
+                      <%= (currentSettings.workingDays && (currentSettings.workingDays.includes(day) || currentSettings.workingDays.includes(dayToNum[day]))) ? 'checked' : '' %>>
+                    <span class="checkbox-text"><%= day %></span>
+                  </label>
+                <% }); %>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="form-group">
+                <label for="workingHoursStart" class="form-label">Working Hours Start</label>
+                <input type="time" id="workingHoursStart" name="workingHoursStart" class="form-input"
+                  value="<%= currentSettings.workingHoursStart || '09:00' %>">
+              </div>
+              <div class="form-group">
+                <label for="workingHoursEnd" class="form-label">Working Hours End</label>
+                <input type="time" id="workingHoursEnd" name="workingHoursEnd" class="form-input"
+                  value="<%= currentSettings.workingHoursEnd || '17:00' %>">
+              </div>
+            </div>
+
+            <div class="grid-3">
+              <div class="form-group">
+                <label for="appointmentDuration" class="form-label">Appointment Duration (minutes)</label>
+                <input type="number" id="appointmentDuration" name="appointmentDuration" class="form-input"
+                  value="<%= currentSettings.appointmentDuration || 60 %>" min="15" max="480" step="15">
+              </div>
+              <div class="form-group">
+                <label for="gapBetweenAppointments" class="form-label">Gap Between Appointments (minutes)</label>
+                <input type="number" id="gapBetweenAppointments" name="gapBetweenAppointments" class="form-input"
+                  value="<%= currentSettings.gapBetweenAppointments || 15 %>" min="0" max="120" step="5">
+              </div>
+              <div class="form-group">
+                <label for="pendingExpiryHours" class="form-label">Pending Expiry (hours)</label>
+                <input type="number" id="pendingExpiryHours" name="pendingExpiryHours" class="form-input"
+                  value="<%= currentSettings.pendingExpiryHours || 48 %>" min="1" max="168">
+              </div>
+            </div>
+          </div>
+
+          <!-- Company Information -->
+          <div class="card settings-card">
+            <h3 class="detail-card-title">&#127970; Company Information</h3>
+
+            <div class="grid-2">
+              <div class="form-group">
+                <label for="companyName" class="form-label">Company Name</label>
+                <input type="text" id="companyName" name="companyName" class="form-input"
+                  value="<%= currentSettings.companyName || '' %>">
+              </div>
+              <div class="form-group">
+                <label for="companyEmail" class="form-label">Company Email</label>
+                <input type="email" id="companyEmail" name="companyEmail" class="form-input"
+                  value="<%= currentSettings.companyEmail || '' %>">
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="form-group">
+                <label for="companyPhone" class="form-label">Company Phone</label>
+                <input type="tel" id="companyPhone" name="companyPhone" class="form-input"
+                  value="<%= currentSettings.companyPhone || '' %>">
+              </div>
+              <div class="form-group">
+                <label for="companyAddress" class="form-label">Company Address</label>
+                <input type="text" id="companyAddress" name="companyAddress" class="form-input"
+                  value="<%= currentSettings.companyAddress || '' %>">
+              </div>
+            </div>
+          </div>
+
+          <!-- Save Button -->
+          <div class="settings-actions">
+            <button type="submit" class="btn btn-primary btn-lg">Save Settings</button>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

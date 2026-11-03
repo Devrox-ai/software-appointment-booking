@@ -1,0 +1,89 @@
+<%- include('partials/header') %>
+
+  <!-- Page Header -->
+  <section class="page-header">
+    <div class="container">
+      <h1>Privacy Policy</h1>
+      <p>Your privacy matters to us. Learn how we collect, use, and protect your data.</p>
+    </div>
+  </section>
+
+  <!-- Privacy Content -->
+  <section class="section">
+    <div class="container">
+      <div class="card legal-content">
+        <p class="legal-updated">Last Updated: <%= new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+
+        <h2>1. Information We Collect</h2>
+        <p>When you use our services or book an appointment through our platform, we may collect the following information:</p>
+        <ul>
+          <li><strong>Personal Information:</strong> Name, email address, phone number, and company name provided during the booking process or via our contact form.</li>
+          <li><strong>Project Information:</strong> Details about your project or requirements that you share during the consultation booking.</li>
+          <li><strong>Usage Data:</strong> Browser type, IP address, pages visited, time spent on pages, and other diagnostic data collected automatically when you visit our website.</li>
+          <li><strong>Cookies:</strong> Small data files stored on your device that help us improve your experience. See Section 5 for details.</li>
+        </ul>
+
+        <h2>2. How We Use Your Information</h2>
+        <p>We use the information we collect for the following purposes:</p>
+        <ul>
+          <li>To process and manage your appointment bookings.</li>
+          <li>To communicate with you regarding your appointments, including confirmations, reminders, and follow-ups.</li>
+          <li>To respond to your inquiries and provide customer support.</li>
+          <li>To improve our website, services, and user experience.</li>
+          <li>To send you relevant information about our services, only if you have opted in to receive such communications.</li>
+          <li>To comply with legal obligations and protect our rights.</li>
+        </ul>
+
+        <h2>3. Data Storage and Security</h2>
+        <p>We take the security of your personal data seriously and implement appropriate technical and organizational measures to protect it against unauthorized access, alteration, disclosure, or destruction. These measures include:</p>
+        <ul>
+          <li>Encryption of data in transit using SSL/TLS protocols.</li>
+          <li>Secure server infrastructure with restricted access controls.</li>
+          <li>Regular security audits and vulnerability assessments.</li>
+          <li>Employee access limited on a need-to-know basis.</li>
+        </ul>
+        <p>Your data is stored on secure servers and retained only for as long as necessary to fulfill the purposes outlined in this policy, or as required by law.</p>
+
+        <h2>4. Data Sharing and Third Parties</h2>
+        <p>We do not sell, trade, or rent your personal information to third parties. We may share your information only in the following limited circumstances:</p>
+        <ul>
+          <li><strong>Service Providers:</strong> We may share data with trusted third-party service providers who assist us in operating our website and delivering services (e.g., email delivery services), under strict confidentiality agreements.</li>
+          <li><strong>Legal Compliance:</strong> We may disclose your information if required to do so by law or in response to valid requests by public authorities.</li>
+          <li><strong>Business Transfers:</strong> In the event of a merger, acquisition, or sale of assets, your data may be transferred as part of the transaction.</li>
+        </ul>
+
+        <h2>5. Cookies</h2>
+        <p>Our website uses cookies to enhance your browsing experience. Cookies are small text files placed on your device that help us:</p>
+        <ul>
+          <li>Remember your preferences and settings.</li>
+          <li>Understand how you use our website so we can improve it.</li>
+          <li>Ensure the security and integrity of our platform.</li>
+        </ul>
+        <p>You can control and manage cookies through your browser settings. Please note that disabling cookies may limit certain features or functionality of our website.</p>
+
+        <h2>6. Your Rights</h2>
+        <p>You have the following rights regarding your personal data:</p>
+        <ul>
+          <li><strong>Access:</strong> You may request a copy of the personal data we hold about you.</li>
+          <li><strong>Correction:</strong> You may request that we correct any inaccurate or incomplete data.</li>
+          <li><strong>Deletion:</strong> You may request that we delete your personal data, subject to legal retention requirements.</li>
+          <li><strong>Objection:</strong> You may object to the processing of your data for certain purposes.</li>
+          <li><strong>Portability:</strong> You may request your data in a structured, commonly used format.</li>
+        </ul>
+        <p>To exercise any of these rights, please contact us at <a href="mailto:<%= settings.companyEmail %>"><%= settings.companyEmail %></a>.</p>
+
+        <h2>7. Changes to This Policy</h2>
+        <p>We may update this Privacy Policy from time to time. Any changes will be posted on this page with an updated revision date. We encourage you to review this policy periodically to stay informed about how we are protecting your information.</p>
+
+        <h2>8. Contact Us</h2>
+        <p>If you have any questions or concerns about this Privacy Policy, please contact us:</p>
+        <ul>
+          <li>Email: <a href="mailto:<%= settings.companyEmail %>"><%= settings.companyEmail %></a></li>
+          <li>Phone: <%= settings.companyPhone %></li>
+          <li>Address: <%= settings.companyAddress %></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+<%- include('partials/footer') %>
