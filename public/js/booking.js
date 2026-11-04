@@ -1,11 +1,16 @@
 /**
  * ONE CONTINUOUS SINGLE-PAGE APPOINTMENT BOOKING EXPERIENCE
  *
- * Flow on THE SAME PAGE:
- * 1. Select Service at top -> details form appears directly below and page smoothly scrolls down.
- * 2. Fill Details -> Click 'Continue to Date & Time' -> Calendar appears directly below and page scrolls down.
- * 3. Pick Date & Slot -> Live slots load -> Review summary appears directly below and page scrolls down.
- * 4. Review & Confirm -> Submits booking without navigating away or re-selecting services.
+ * Specific Flow:
+ * - If customer visits /book?service=SERVICE_ID (e.g. clicked Book on Home/Services):
+ *   1. Service selection cards are HIDDEN.
+ *   2. The first visible content is the SELECTED SERVICE BANNER with the actual service name.
+ *   3. Followed DIRECTLY by the CUSTOMER DETAILS FORM (Full Name, Email, Country Code, Phone, Company, Requirements).
+ *   4. Customer NEVER sees the service selection screen unless they click "Change Service".
+ * - If customer visits /book without service ID:
+ *   1. Service cards are shown at top.
+ *   2. Clicking a service immediately sets the banner, hides/collapses the service cards, and reveals Customer Details directly below.
+ * - Customer continues on the SAME page to Date & Time, picks a slot, reviews, and submits without page reloads or repeating selections.
  */
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -21,16 +26,18 @@ document.addEventListener('DOMContentLoaded', function() {
   let calendarMonth = now.getMonth();
   let calendarYear = now.getFullYear();
 
-  // Section Blocks on the single page
+  // DOM Sections
   const sectionService = document.getElementById('sectionServiceSelection');
   const sectionCustomerDetails = document.getElementById('sectionCustomerDetails');
   const sectionDateTime = document.getElementById('sectionDateTime');
   const sectionReview = document.getElementById('sectionReview');
 
-  // Top Status Strip elements
-  const stripServiceBadge = document.getElementById('stripServiceBadge');
-  const stripDetailsBadge = document.getElementById('stripDetailsBadge');
-  const chipServiceName = document.getElementById('chipServiceName');
+  // Top Banner
+  const selectedServiceTopBanner = document.getElementById('selectedServiceTopBanner');
+  const topBannerServiceName = document.getElementById('topBannerServiceName');
+  const topBannerServiceDesc = document.getElementById('topBannerServiceDesc');
+  const topBannerServiceIcon = document.getElementById('topBannerServiceIcon');
+  const btnToggleChangeService = document.getElementById('btnToggleChangeService');
 
   // Form Inputs
   const serviceCards = document.querySelectorAll('.service-selectable');
@@ -47,14 +54,14 @@ document.addEventListener('DOMContentLoaded', function() {
   const selectedDateDisplayBadge = document.getElementById('selectedDateDisplayBadge');
   const slotStatusHint = document.getElementById('slotStatusHint');
 
-  // Action Buttons
+  // Buttons
   const btnContinueToDateTime = document.getElementById('btnContinueToDateTime');
   const btnSubmitBooking = document.getElementById('btnSubmitBooking');
   const btnEditService = document.getElementById('btnEditService');
   const btnEditDetails = document.getElementById('btnEditDetails');
   const btnEditSchedule = document.getElementById('btnEditSchedule');
 
-  // Summary Elements
+  // Review Summary Elements
   const summaryService = document.getElementById('summaryService');
   const summaryName = document.getElementById('summaryName');
   const summaryEmail = document.getElementById('summaryEmail');
@@ -115,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Pre-sync on load
+  // Pre-sync phone on load
   syncPhoneNumber();
 
   // ─── 2. Fetch Blocked Dates & Working Days ───────────────────────────────────
@@ -133,32 +140,36 @@ document.addEventListener('DOMContentLoaded', function() {
       renderCalendar(calendarMonth, calendarYear);
     });
 
-  // ─── 3. Service Selection (Step 1 -> Opens Step 2 on SAME PAGE) ──────────────
-  function handleServiceSelect(card, shouldScroll = true) {
-    if (!card) return;
+  // ─── 3. Handle Service Selection & Preselected State ─────────────────────────
+  function applyServiceSelection(serviceId, serviceName, serviceDesc, serviceIcon, shouldScroll = true) {
+    if (serviceIdInput) serviceIdInput.value = serviceId;
 
-    serviceCards.forEach(c => c.classList.remove('selected'));
-    card.classList.add('selected');
+    // Highlight matching card in the grid
+    serviceCards.forEach(card => {
+      if (card.getAttribute('data-service-id') === serviceId) {
+        card.classList.add('selected');
+      } else {
+        card.classList.remove('selected');
+      }
+    });
 
-    const id = card.getAttribute('data-service-id');
-    const name = card.getAttribute('data-service-name');
-    if (serviceIdInput) serviceIdInput.value = id;
-
-    // Update status bar & badges
-    if (stripServiceBadge) {
-      stripServiceBadge.textContent = name;
-      stripServiceBadge.className = 'badge badge-accepted';
+    // Update Top Banner
+    if (selectedServiceTopBanner) {
+      selectedServiceTopBanner.style.display = 'block';
     }
-    if (chipServiceName) chipServiceName.textContent = name;
-    if (summaryService) summaryService.textContent = name;
+    if (topBannerServiceName) topBannerServiceName.textContent = serviceName;
+    if (topBannerServiceDesc) topBannerServiceDesc.textContent = serviceDesc || '';
+    if (topBannerServiceIcon && serviceIcon) topBannerServiceIcon.innerHTML = serviceIcon;
+    if (btnToggleChangeService) btnToggleChangeService.innerHTML = '&#9998; Change Service';
 
-    const errServ = document.getElementById('errServiceSelection');
-    if (errServ) errServ.style.display = 'none';
+    // Hide the service cards grid so customer directly sees the details form
+    if (sectionService) {
+      sectionService.style.display = 'none';
+    }
 
-    // REVEAL Step 2 (Customer Details) directly below on the SAME page
+    // Immediately display the Customer Details Form directly underneath
     if (sectionCustomerDetails) {
       sectionCustomerDetails.style.display = 'block';
-
       if (shouldScroll) {
         setTimeout(() => {
           sectionCustomerDetails.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -166,21 +177,58 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
 
+    if (summaryService) summaryService.textContent = serviceName;
+
+    const errServ = document.getElementById('errServiceSelection');
+    if (errServ) errServ.style.display = 'none';
+
     updateReviewSummary();
   }
 
+  // Attach click listener to each service card
   serviceCards.forEach(card => {
     card.addEventListener('click', function() {
-      handleServiceSelect(this, true);
+      const id = this.getAttribute('data-service-id');
+      const name = this.getAttribute('data-service-name');
+      const desc = this.getAttribute('data-service-desc') || '';
+      const icon = this.getAttribute('data-service-icon') || '&#128736;';
+      applyServiceSelection(id, name, desc, icon, true);
     });
   });
 
-  // Check pre-selected card from query ?service=xxx or server validation error
-  const initialCard = document.querySelector('.service-selectable.selected') ||
-    (serviceIdInput && serviceIdInput.value ? document.querySelector(`.service-selectable[data-service-id="${serviceIdInput.value}"]`) : null);
+  // Toggle "Change Service" button in banner
+  if (btnToggleChangeService) {
+    btnToggleChangeService.addEventListener('click', function(e) {
+      e.preventDefault();
+      if (!sectionService) return;
 
-  if (initialCard) {
-    handleServiceSelect(initialCard, false);
+      const isHidden = sectionService.style.display === 'none' || getComputedStyle(sectionService).display === 'none';
+      if (isHidden) {
+        sectionService.style.display = 'block';
+        btnToggleChangeService.innerHTML = '&#10005; Close Services';
+        setTimeout(() => {
+          sectionService.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 80);
+      } else {
+        sectionService.style.display = 'none';
+        btnToggleChangeService.innerHTML = '&#9998; Change Service';
+        setTimeout(() => {
+          sectionCustomerDetails.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 80);
+      }
+    });
+  }
+
+  // Check pre-selected service on page load (e.g. /book?service=ID)
+  const currentServiceId = serviceIdInput ? serviceIdInput.value : '';
+  if (currentServiceId) {
+    const matchingCard = document.querySelector(`.service-selectable[data-service-id="${currentServiceId}"]`);
+    const name = matchingCard ? matchingCard.getAttribute('data-service-name') : (topBannerServiceName ? topBannerServiceName.textContent.trim() : 'Selected Service');
+    const desc = matchingCard ? matchingCard.getAttribute('data-service-desc') : (topBannerServiceDesc ? topBannerServiceDesc.textContent.trim() : '');
+    const icon = matchingCard ? matchingCard.getAttribute('data-service-icon') : '';
+
+    // Apply without smooth scroll on page load so customer directly sees form at the top
+    applyServiceSelection(currentServiceId, name, desc, icon, false);
   }
 
   // ─── 4. Customer Details Validation & Continue to Schedule ───────────────────
@@ -265,13 +313,14 @@ document.addEventListener('DOMContentLoaded', function() {
     btnContinueToDateTime.addEventListener('click', function(e) {
       e.preventDefault();
       if (!serviceIdInput || !serviceIdInput.value) {
-        alert('Please select a software service from Section 1 above first.');
+        alert('Please select a software service first.');
+        sectionService.style.display = 'block';
         sectionService.scrollIntoView({ behavior: 'smooth', block: 'start' });
         return;
       }
 
       if (validateCustomerDetails()) {
-        // REVEAL Step 3 (Date & Time) on THE SAME PAGE directly below
+        // Reveal Section 3 (Date & Time) on THE SAME PAGE directly below
         if (sectionDateTime) {
           sectionDateTime.style.display = 'block';
           if (!calendarContainer.innerHTML.trim()) {
@@ -282,17 +331,12 @@ document.addEventListener('DOMContentLoaded', function() {
           }, 80);
         }
 
-        if (stripDetailsBadge) {
-          const custName = (document.getElementById('customerName')?.value || '').trim();
-          stripDetailsBadge.innerHTML = `Client: <strong>${custName}</strong> &bull; Select Date & Time`;
-        }
-
         updateReviewSummary();
       }
     });
   }
 
-  // If customer details were already pre-filled from server error/render, reveal DateTime
+  // If customer details were already pre-filled from server render, reveal DateTime
   const preName = (document.getElementById('customerName')?.value || '').trim();
   if (preName && serviceIdInput && serviceIdInput.value) {
     if (sectionDateTime) {
@@ -506,7 +550,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         timeSlotsContainer.innerHTML = slotsHtml;
 
-        // Slot click handlers -> REVEALS Step 4 (Review) on THE SAME PAGE
+        // Slot click handlers -> REVEALS Section 4 (Review) on THE SAME PAGE
         timeSlotsContainer.querySelectorAll('.slot-btn.slot-available').forEach(sBtn => {
           sBtn.addEventListener('click', function(e) {
             e.preventDefault();
@@ -544,7 +588,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // ─── 7. Live Review Summary Updater ──────────────────────────────────────────
   function updateReviewSummary() {
     const selectedCard = document.querySelector('.service-selectable.selected');
-    const serviceName = selectedCard ? selectedCard.getAttribute('data-service-name') : (serviceIdInput?.value ? 'Selected Service' : '—');
+    const serviceName = selectedCard ? selectedCard.getAttribute('data-service-name') : (topBannerServiceName ? topBannerServiceName.textContent.trim() : (serviceIdInput?.value ? 'Selected Service' : '—'));
     const name = (document.getElementById('customerName')?.value || '').trim();
     const email = (document.getElementById('customerEmail')?.value || '').trim();
     const company = (document.getElementById('customerCompany')?.value || '').trim();
@@ -592,21 +636,29 @@ document.addEventListener('DOMContentLoaded', function() {
   if (btnEditService) {
     btnEditService.addEventListener('click', function(e) {
       e.preventDefault();
-      sectionService.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (sectionService) {
+        sectionService.style.display = 'block';
+        if (btnToggleChangeService) btnToggleChangeService.innerHTML = '&#10005; Close Services';
+        sectionService.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     });
   }
 
   if (btnEditDetails) {
     btnEditDetails.addEventListener('click', function(e) {
       e.preventDefault();
-      sectionCustomerDetails.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (sectionCustomerDetails) {
+        sectionCustomerDetails.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     });
   }
 
   if (btnEditSchedule) {
     btnEditSchedule.addEventListener('click', function(e) {
       e.preventDefault();
-      sectionDateTime.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (sectionDateTime) {
+        sectionDateTime.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     });
   }
 
@@ -620,15 +672,20 @@ document.addEventListener('DOMContentLoaded', function() {
         errServ.textContent = 'Please choose a software service from Section 1 above.';
         errServ.style.display = 'block';
       }
-      sectionService.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (sectionService) {
+        sectionService.style.display = 'block';
+        sectionService.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
       return false;
     }
 
     // 2. Check Customer Details
     if (!validateCustomerDetails()) {
       e.preventDefault();
-      sectionCustomerDetails.style.display = 'block';
-      sectionCustomerDetails.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (sectionCustomerDetails) {
+        sectionCustomerDetails.style.display = 'block';
+        sectionCustomerDetails.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
       return false;
     }
 
@@ -636,23 +693,27 @@ document.addEventListener('DOMContentLoaded', function() {
     const errSlot = document.getElementById('errAppointmentSlot');
     if (!appointmentDateInput || !appointmentDateInput.value) {
       e.preventDefault();
-      sectionDateTime.style.display = 'block';
-      if (errSlot) {
-        errSlot.textContent = 'Please select an appointment date from the calendar.';
-        errSlot.style.display = 'block';
+      if (sectionDateTime) {
+        sectionDateTime.style.display = 'block';
+        if (errSlot) {
+          errSlot.textContent = 'Please select an appointment date from the calendar.';
+          errSlot.style.display = 'block';
+        }
+        sectionDateTime.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
-      sectionDateTime.scrollIntoView({ behavior: 'smooth', block: 'start' });
       return false;
     }
 
     if (!appointmentTimeInput || !appointmentTimeInput.value) {
       e.preventDefault();
-      sectionDateTime.style.display = 'block';
-      if (errSlot) {
-        errSlot.textContent = 'Please select an available consultation time slot.';
-        errSlot.style.display = 'block';
+      if (sectionDateTime) {
+        sectionDateTime.style.display = 'block';
+        if (errSlot) {
+          errSlot.textContent = 'Please select an available consultation time slot.';
+          errSlot.style.display = 'block';
+        }
+        sectionDateTime.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
-      sectionDateTime.scrollIntoView({ behavior: 'smooth', block: 'start' });
       return false;
     }
 

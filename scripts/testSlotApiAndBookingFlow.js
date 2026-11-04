@@ -94,26 +94,44 @@ async function runTests() {
     assert(normalizePhone('+1', '4155552671') === '+14155552671', 'US calling code (+1) correctly formatted');
     assert(normalizePhone('+971', '501234567') === '+971501234567', 'UAE calling code (+971) correctly formatted');
 
-    // ─── TEST 5: Booking Service Selection & Step Flow ──────────────────────
-    const service = await db.collection('services').findOne({ isActive: { $ne: false } });
-    assert(service && service._id, `Found active service for booking: "${service?.name}"`);
+    // ─── TEST 5: Exact URL Navigation: /book?service=6ae86b114f4880fc40d22fcd ──
+    const targetServiceId = '6ae86b114f4880fc40d22fcd';
+    const targetService = await db.collection('services').findOne({ _id: new ObjectId(targetServiceId) });
+    assert(targetService && targetService.name === 'Website Development', 'Found target service "Website Development" (ID: 6ae86b114f4880fc40d22fcd)');
 
-    // Verify GET /book?service=xxx loads with selectedService
-    const resBookPage = await new Promise(resolve => {
-      http.get(`http://127.0.0.1:3088/book?service=${service._id}`, res => {
+    // 5A: Test /book?service=6ae86b114f4880fc40d22fcd (Preselected via Home/Services button)
+    const resPreselected = await new Promise(resolve => {
+      http.get(`http://127.0.0.1:3088/book?service=${targetServiceId}`, res => {
         let html = '';
         res.on('data', c => html += c);
         res.on('end', () => resolve({ status: res.statusCode, html }));
       });
     });
-    assert(resBookPage.status === 200, 'GET /book?service=... returns HTTP 200');
-    assert(resBookPage.html.includes(service._id.toString()), 'Page includes pre-selected serviceId');
-    assert(resBookPage.html.includes('Select a Software Service'), 'Page contains Section 1: Select Software Service');
-    assert(resBookPage.html.includes('Your Contact &amp; Project Details'), 'Page contains Section 2: Contact & Details on the SAME page');
-    assert(resBookPage.html.includes('Select Appointment Date &amp; Time'), 'Page contains Section 3: Date & Time on the SAME page');
-    assert(resBookPage.html.includes('Review &amp; Confirm Booking'), 'Page contains Section 4: Review & Confirm on the SAME page');
-    assert(resBookPage.html.includes('countryCodeSelect'), 'Page contains Country Code Dropdown (countryCodeSelect)');
-    assert(resBookPage.html.includes('🇮🇳 India (+91)'), 'India (+91) is present and set as default in dropdown');
+
+    assert(resPreselected.status === 200, 'GET /book?service=6ae86b114f4880fc40d22fcd returns HTTP 200');
+    assert(resPreselected.html.includes('SELECTED SERVICE'), 'Banner displays "SELECTED SERVICE" at top of page');
+    assert(resPreselected.html.includes('Website Development'), 'Banner displays actual service name "Website Development"');
+    assert(resPreselected.html.includes('id="sectionServiceSelection" style="display: none;'), 'Service selection cards are HIDDEN when service ID is present');
+    assert(resPreselected.html.includes('id="sectionCustomerDetails" style="display: block;'), 'Customer details form is IMMEDIATELY DISPLAYED');
+    assert(resPreselected.html.includes('Customer Details Form'), 'Customer Details Form heading is directly visible');
+    assert(resPreselected.html.includes('countryCodeSelect'), 'Country Code Dropdown is present');
+    assert(resPreselected.html.includes('🇮🇳 India (+91)'), 'India (+91) is default in Country Code Dropdown');
+
+    // 5B: Test bare /book (No service ID in URL)
+    const resBareBook = await new Promise(resolve => {
+      http.get('http://127.0.0.1:3088/book', res => {
+        let html = '';
+        res.on('data', c => html += c);
+        res.on('end', () => resolve({ status: res.statusCode, html }));
+      });
+    });
+
+    assert(resBareBook.status === 200, 'GET /book returns HTTP 200');
+    assert(resBareBook.html.includes('id="sectionServiceSelection" style="display: block;'), 'Service selection cards are SHOWN when no service ID is in URL');
+    assert(resBareBook.html.includes('id="sectionCustomerDetails" style="display: none;'), 'Customer details form is hidden until customer chooses a service');
+    assert(resBareBook.html.includes('id="selectedServiceTopBanner"\n           style="display: none;'), 'Top banner is hidden on bare /book');
+
+    const service = targetService;
 
     // ─── TEST 6: Real Booking Insertion with Country Code ───────────────────
     const testDate = '2026-11-26';

@@ -19,11 +19,30 @@ router.get('/book', async (req, res) => {
       .find({ isActive: { $ne: false } })
       .sort({ order: 1 })
       .toArray();
-    const selectedService = req.query.service || '';
+
+    const serviceQuery = (req.query.service || '').trim();
+    let selectedServiceDoc = null;
+    let selectedService = '';
+
+    if (serviceQuery) {
+      try {
+        selectedServiceDoc = await db.collection('services').findOne({
+          _id: new ObjectId(serviceQuery),
+          isActive: { $ne: false }
+        });
+      } catch (e) {
+        selectedServiceDoc = null;
+      }
+      if (selectedServiceDoc) {
+        selectedService = selectedServiceDoc._id.toString();
+      }
+    }
+
     res.render('appointments/book', {
-      title: 'Book Appointment',
+      title: selectedServiceDoc ? `Book ${selectedServiceDoc.name}` : 'Book Appointment',
       services,
       selectedService,
+      selectedServiceDoc,
       formData: {},
       error: null
     });
@@ -33,6 +52,7 @@ router.get('/book', async (req, res) => {
       title: 'Book Appointment',
       services: [],
       selectedService: '',
+      selectedServiceDoc: null,
       formData: {},
       error: 'Unable to load services. Please try again.'
     });
