@@ -75,7 +75,7 @@
         </div>
 
         <!-- Stat Cards -->
-        <div class="grid-4 stats-grid">
+        <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
           <div class="stat-card card">
             <div class="stat-card-icon stat-total">&#128203;</div>
             <div class="stat-card-info">
@@ -100,8 +100,15 @@
           <div class="stat-card card">
             <div class="stat-card-icon stat-rejected">&#10060;</div>
             <div class="stat-card-info">
-              <h3 class="stat-card-value"><%= (stats.rejected || 0) + (stats.cancelled || 0) %></h3>
-              <p class="stat-card-label">Rejected / Cancelled</p>
+              <h3 class="stat-card-value"><%= stats.rejected || 0 %></h3>
+              <p class="stat-card-label">Rejected</p>
+            </div>
+          </div>
+          <div class="stat-card card">
+            <div class="stat-card-icon" style="background: #f1f5f9; color: #64748b;">&#9888;</div>
+            <div class="stat-card-info">
+              <h3 class="stat-card-value"><%= stats.cancelled || 0 %></h3>
+              <p class="stat-card-label">Cancelled</p>
             </div>
           </div>
         </div>
@@ -128,7 +135,10 @@
                   <% todayBookings.forEach(function(booking) { %>
                     <tr>
                       <td><strong>SAB-<%= booking.bookingId || booking._id.toString().slice(-6).toUpperCase() %></strong></td>
-                      <td><%= booking.customerName %></td>
+                      <td>
+                        <div><strong><%= booking.customerName %></strong></div>
+                        <small class="text-muted"><%= booking.customerPhone %></small>
+                      </td>
                       <td><%= booking.service ? booking.service.name : 'N/A' %></td>
                       <td><%= booking.appointmentTime %></td>
                       <td>
@@ -173,7 +183,10 @@
                   <% upcomingBookings.forEach(function(booking) { %>
                     <tr>
                       <td><strong>SAB-<%= booking.bookingId || booking._id.toString().slice(-6).toUpperCase() %></strong></td>
-                      <td><%= booking.customerName %></td>
+                      <td>
+                        <div><strong><%= booking.customerName %></strong></div>
+                        <small class="text-muted"><%= booking.customerPhone %></small>
+                      </td>
                       <td><%= booking.service ? booking.service.name : 'N/A' %></td>
                       <td><%= new Date(booking.appointmentDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></td>
                       <td><%= booking.appointmentTime %></td>
@@ -219,7 +232,10 @@
                   <% recentBookings.forEach(function(booking) { %>
                     <tr>
                       <td><strong>SAB-<%= booking.bookingId || booking._id.toString().slice(-6).toUpperCase() %></strong></td>
-                      <td><%= booking.customerName %></td>
+                      <td>
+                        <div><strong><%= booking.customerName %></strong></div>
+                        <small class="text-muted"><%= booking.customerPhone %></small>
+                      </td>
                       <td><%= booking.service ? booking.service.name : 'N/A' %></td>
                       <td><%= new Date(booking.appointmentDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></td>
                       <td><%= booking.appointmentTime %></td>

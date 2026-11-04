@@ -96,7 +96,10 @@
               </div>
               <div class="detail-item">
                 <span class="detail-label">Phone</span>
-                <span class="detail-value"><a href="tel:<%= booking.customerPhone %>"><%= booking.customerPhone %></a></span>
+                <span class="detail-value">
+                  <a href="tel:<%= booking.customerPhone %>" style="font-weight: 600;"><%= booking.customerPhone %></a>
+                  <a href="https://wa.me/<%= (booking.customerPhone || '').replace(/[^\d]/g, '') %>" target="_blank" class="badge badge-accepted" style="margin-left: 8px; text-decoration: none; font-size: 0.78rem;" title="Chat with customer on WhatsApp">&#128172; WhatsApp</a>
+                </span>
               </div>
               <div class="detail-item">
                 <span class="detail-label">Company</span>

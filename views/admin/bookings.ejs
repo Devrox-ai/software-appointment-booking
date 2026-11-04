@@ -79,15 +79,16 @@
             <a href="/admin/bookings?status=cancelled<%= searchQuery ? '&search=' + encodeURIComponent(searchQuery) : '' %>" class="filter-tab <%= currentFilter === 'cancelled' ? 'active' : '' %>">Cancelled</a>
           </div>
 
-          <!-- Search Form -->
-          <form action="/admin/bookings" method="GET" class="admin-search-form" style="display: flex; gap: 0.5rem; flex: 1; max-width: 380px;">
+          <!-- Search & Date Filter Form -->
+          <form action="/admin/bookings" method="GET" class="admin-search-form" style="display: flex; gap: 0.5rem; flex: 1; max-width: 500px; flex-wrap: wrap;">
             <% if (currentFilter && currentFilter !== 'all') { %>
               <input type="hidden" name="status" value="<%= currentFilter %>">
             <% } %>
-            <input type="text" name="search" class="form-input" placeholder="Search by name, email, phone, ID..." value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" style="padding: 0.45rem 0.85rem; font-size: 0.9rem;">
-            <button type="submit" class="btn btn-primary btn-sm">Search</button>
-            <% if (typeof searchQuery !== 'undefined' && searchQuery) { %>
-              <a href="/admin/bookings<%= currentFilter && currentFilter !== 'all' ? '?status=' + currentFilter : '' %>" class="btn btn-secondary btn-sm" title="Clear search">&#10005;</a>
+            <input type="text" name="search" class="form-input" placeholder="Search by name, email, phone, ID..." value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" style="padding: 0.45rem 0.85rem; font-size: 0.9rem; flex: 1; min-width: 160px;">
+            <input type="date" name="date" class="form-input" value="<%= typeof dateFilter !== 'undefined' ? dateFilter : '' %>" title="Filter by appointment date" style="padding: 0.45rem 0.5rem; font-size: 0.88rem; max-width: 145px;">
+            <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+            <% if ((typeof searchQuery !== 'undefined' && searchQuery) || (typeof dateFilter !== 'undefined' && dateFilter)) { %>
+              <a href="/admin/bookings<%= currentFilter && currentFilter !== 'all' ? '?status=' + currentFilter : '' %>" class="btn btn-secondary btn-sm" title="Clear filters">&#10005; Clear</a>
             <% } %>
           </form>
         </div>
@@ -101,6 +102,7 @@
                   <tr>
                     <th>Booking ID</th>
                     <th>Customer</th>
+                    <th>Phone</th>
                     <th>Service</th>
                     <th>Date</th>
                     <th>Time</th>
@@ -115,6 +117,9 @@
                       <td>
                         <div><%= booking.customerName %></div>
                         <small class="text-muted"><%= booking.customerEmail %></small>
+                      </td>
+                      <td>
+                        <a href="tel:<%= booking.customerPhone %>" style="color: var(--primary); font-weight: 500;"><%= booking.customerPhone %></a>
                       </td>
                       <td><%= booking.service ? booking.service.name : 'N/A' %></td>
                       <td><%= new Date(booking.appointmentDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></td>

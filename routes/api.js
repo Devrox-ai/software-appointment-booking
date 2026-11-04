@@ -8,33 +8,55 @@ const { getDB } = require('../config/database');
 const { getSettings } = require('../config/settings');
 
 /**
- * GET /api/available-slots?date=YYYY-MM-DD
- * Returns available time slots for the given date.
+ * Shared Handler: Get Available & Booked Slots for a Given Date
+ * Supports both /api/slots and /api/available-slots
  */
-router.get('/available-slots', async (req, res) => {
+async function handleSlotsRequest(req, res) {
   try {
     const { date } = req.query;
     if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      return res.json({ success: false, message: 'Invalid date format.' });
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid date format. Expected YYYY-MM-DD.',
+        message: 'Invalid date format.'
+      });
     }
 
     const db = getDB();
     const settings = await getSettings(db);
 
-    // Check if the date is blocked
+    // 1. Check if date is blocked by admin
     const blocked = await db.collection('blocked_dates').findOne({ date });
     if (blocked) {
-      return res.json({ success: true, slots: [], blocked: true, message: 'This date is blocked.' });
+      return res.json({
+        success: true,
+        date,
+        slots: [],
+        availableSlots: [],
+        isBlocked: true,
+        blocked: true,
+        message: blocked.reason || 'This date is marked as unavailable.'
+      });
     }
 
-    // Check if the day is a working day
-    const dayOfWeek = new Date(date + 'T00:00:00').getDay(); // 0=Sun..6=Sat
+    // 2. Check if the date falls on a configured working day
+    // Parse year, month, day to avoid timezone drift
+    const [y, m, d] = date.split('-').map(Number);
+    const dayOfWeek = new Date(y, m - 1, d).getDay(); // 0 = Sunday, 1 = Monday... 6 = Saturday
     const workingDays = settings.workingDays || [1, 2, 3, 4, 5, 6];
     if (!workingDays.includes(dayOfWeek)) {
-      return res.json({ success: true, slots: [], message: 'Not a working day.' });
+      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      return res.json({
+        success: true,
+        date,
+        slots: [],
+        availableSlots: [],
+        isWorkingDay: false,
+        message: `${dayNames[dayOfWeek]} is a non-working day. Please select a date between Monday and Saturday.`
+      });
     }
 
-    // Generate all possible slots
+    // 3. Generate all configured schedule slots
     const startTime = settings.workingHoursStart || '10:00';
     const endTime = settings.workingHoursEnd || '18:00';
     const duration = settings.appointmentDuration || 30;
@@ -42,7 +64,7 @@ router.get('/available-slots', async (req, res) => {
 
     const allSlots = generateTimeSlots(startTime, endTime, duration, gap);
 
-    // Get existing bookings for this date (pending + accepted occupy the slot)
+    // 4. Fetch existing booked slots for this date (both 'pending' and 'accepted' reserve the slot)
     const existingBookings = await db.collection('appointments')
       .find({
         appointmentDate: date,
@@ -53,30 +75,66 @@ router.get('/available-slots', async (req, res) => {
 
     const takenTimes = new Set(existingBookings.map(b => b.appointmentTime));
 
-    // Filter out past slots if today
+    // 5. If date is today, disable past time slots with a 30-min buffer
     const now = new Date();
-    const today = now.toISOString().split('T')[0];
+    // Format today as YYYY-MM-DD in local time
+    const todayYear = now.getFullYear();
+    const todayMonth = String(now.getMonth() + 1).padStart(2, '0');
+    const todayDay = String(now.getDate()).padStart(2, '0');
+    const todayStr = `${todayYear}-${todayMonth}-${todayDay}`;
     const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-    const available = allSlots.filter(slot => {
-      if (takenTimes.has(slot)) return false;
-      if (date === today) {
-        const [h, m] = slot.split(':').map(Number);
-        if (h * 60 + m <= currentMinutes + 30) return false; // 30 min buffer
+    const slotsData = allSlots.map(timeStr => {
+      const isTaken = takenTimes.has(timeStr);
+      let isPast = false;
+      if (date === todayStr) {
+        const [h, m] = timeStr.split(':').map(Number);
+        if (h * 60 + m <= currentMinutes + 30) {
+          isPast = true;
+        }
       }
-      return true;
+
+      const available = !isTaken && !isPast;
+      let reason = 'available';
+      if (isTaken) reason = 'booked';
+      else if (isPast) reason = 'past';
+
+      return {
+        time: timeStr,
+        available,
+        reason
+      };
     });
 
-    return res.json({ success: true, slots: available });
+    const availableOnly = slotsData.filter(s => s.available).map(s => s.time);
+
+    return res.json({
+      success: true,
+      date,
+      slots: slotsData,
+      availableSlots: availableOnly,
+      isBlocked: false,
+      isWorkingDay: true,
+      totalSlots: slotsData.length,
+      availableCount: availableOnly.length
+    });
   } catch (err) {
-    console.error('Available slots error:', err);
-    return res.json({ success: false, message: 'Server error.' });
+    console.error('Slot calculation error:', err);
+    return res.status(500).json({
+      success: false,
+      error: 'Unable to connect to slot booking service. Please try again.',
+      message: 'Server error retrieving time slots.'
+    });
   }
-});
+}
+
+// Bind both endpoints to guarantee zero 404s
+router.get('/slots', handleSlotsRequest);
+router.get('/available-slots', handleSlotsRequest);
 
 /**
  * GET /api/blocked-dates?month=YYYY-MM
- * Returns blocked dates and non-working days info for the calendar.
+ * Returns blocked dates and working days info for calendar initialization.
  */
 router.get('/blocked-dates', async (req, res) => {
   try {
@@ -90,12 +148,12 @@ router.get('/blocked-dates', async (req, res) => {
       success: true,
       blockedDates,
       workingDays: settings.workingDays || [1, 2, 3, 4, 5, 6],
-      workingHoursStart: settings.workingHoursStart,
-      workingHoursEnd: settings.workingHoursEnd
+      workingHoursStart: settings.workingHoursStart || '10:00',
+      workingHoursEnd: settings.workingHoursEnd || '18:00'
     });
   } catch (err) {
     console.error('Blocked dates API error:', err);
-    return res.json({ success: false, message: 'Server error.' });
+    return res.status(500).json({ success: false, message: 'Server error retrieving calendar config.' });
   }
 });
 
@@ -105,8 +163,8 @@ router.get('/blocked-dates', async (req, res) => {
  */
 router.get('/admin/calendar-data', async (req, res) => {
   try {
-    const { month } = req.query;   // e.g. '2026-11'
-    if (!month) return res.json({ success: false, message: 'Month required.' });
+    const { month } = req.query; // e.g. '2026-11'
+    if (!month) return res.status(400).json({ success: false, message: 'Month required.' });
 
     const db = getDB();
 
@@ -137,7 +195,7 @@ router.get('/admin/calendar-data', async (req, res) => {
     return res.json({ success: true, bookings, blockedDates });
   } catch (err) {
     console.error('Admin calendar data error:', err);
-    return res.json({ success: false, message: 'Server error.' });
+    return res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
 
@@ -146,8 +204,8 @@ router.get('/admin/calendar-data', async (req, res) => {
  */
 function generateTimeSlots(start, end, durationMinutes, gapMinutes) {
   const slots = [];
-  const [sh, sm] = start.split(':').map(Number);
-  const [eh, em] = end.split(':').map(Number);
+  const [sh, sm] = (start || '10:00').split(':').map(Number);
+  const [eh, em] = (end || '18:00').split(':').map(Number);
   const startMin = sh * 60 + sm;
   const endMin = eh * 60 + em;
 

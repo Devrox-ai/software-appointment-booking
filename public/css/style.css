@@ -803,6 +803,62 @@ p {
   background-color: #fffbfa;
 }
 
+/* ─── Phone Number & Country Code Combo ───────────────────────── */
+.phone-input-combo {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.country-code-select-wrap {
+  flex: 0 0 180px;
+  max-width: 45%;
+}
+
+.country-select {
+  width: 100%;
+  height: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background-color: #ffffff;
+  color: var(--text-main);
+  font-size: 0.92rem;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.country-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.phone-number-wrap {
+  flex: 1;
+}
+
+.phone-number-wrap .form-input {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 576px) {
+  .phone-input-combo {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .country-code-select-wrap {
+    flex: 1 1 auto;
+    max-width: 100%;
+  }
+}
+
 .booking-nav {
   display: flex;
   justify-content: space-between;

@@ -96,6 +96,7 @@ router.get('/bookings', requireAdmin, async (req, res) => {
     const db = getDB();
     const status = req.query.status;
     const search = (req.query.search || '').trim();
+    const dateFilter = (req.query.date || '').trim();
     const page = parseInt(req.query.page) || 1;
     const limit = 15;
     const skip = (page - 1) * limit;
@@ -105,6 +106,10 @@ router.get('/bookings', requireAdmin, async (req, res) => {
       filter.status = status;
     }
 
+    if (dateFilter && /^\d{4}-\d{2}-\d{2}$/.test(dateFilter)) {
+      filter.appointmentDate = dateFilter;
+    }
+
     if (search) {
       const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const regex = new RegExp(escaped, 'i');
@@ -112,7 +117,9 @@ router.get('/bookings', requireAdmin, async (req, res) => {
         { customerName: regex },
         { customerEmail: regex },
         { customerPhone: regex },
-        { bookingId: regex }
+        { phoneNumber: regex },
+        { bookingId: regex },
+        { appointmentDate: regex }
       ];
     }
 
@@ -129,6 +136,7 @@ router.get('/bookings', requireAdmin, async (req, res) => {
       bookings,
       currentFilter: status || 'all',
       searchQuery: search,
+      dateFilter: dateFilter,
       pagination: {
         currentPage: page,
         totalPages: Math.ceil(totalCount / limit) || 1,
