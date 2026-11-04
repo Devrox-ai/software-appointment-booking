@@ -38,12 +38,19 @@ body.admin-body {
   height: var(--admin-header-height);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   padding: 0 1.5rem;
   font-size: 1.15rem;
   font-weight: 700;
   color: #ffffff;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-brand-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  flex-shrink: 0;
 }
 
 .sidebar-nav {
@@ -576,4 +583,201 @@ body.admin-body {
   .admin-content {
     padding: 1rem;
   }
+}
+
+/* ─── Admin Login Page ────────────────────────────────────────── */
+body.admin-login-page {
+  background: radial-gradient(circle at 50% 20%, #f8fafc 0%, #edf2f7 60%, #e2e8f0 100%);
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #0f172a;
+}
+
+.admin-login-wrapper {
+  width: 100%;
+  max-width: 440px;
+  padding: 1.5rem 1rem;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.admin-login-card {
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+  padding: 2.5rem 2rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.admin-login-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.admin-login-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.login-brand-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.admin-login-brand {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #2563eb;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+
+.admin-login-title {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.4rem;
+  letter-spacing: -0.5px;
+}
+
+.admin-login-subtitle {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.admin-login-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  margin-bottom: 1.5rem;
+}
+
+.admin-login-alert .alert-icon {
+  flex-shrink: 0;
+  color: #dc2626;
+}
+
+.admin-login-form .form-group {
+  margin-bottom: 1.25rem;
+}
+
+.admin-login-form .form-label {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 0.4rem;
+}
+
+.admin-login-form .form-input {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #0f172a;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.admin-login-form .form-input:focus {
+  border-color: #2563eb;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.password-field-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-field-wrap .password-input {
+  padding-right: 42px;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 6px;
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.password-toggle-btn:hover {
+  color: #334155;
+  background-color: #f1f5f9;
+}
+
+.admin-submit-btn {
+  width: 100%;
+  padding: 11px 16px;
+  font-size: 0.98rem;
+  font-weight: 600;
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  margin-top: 0.5rem;
+}
+
+.admin-submit-btn:hover {
+  background-color: #1d4ed8;
+}
+
+.admin-submit-btn:active {
+  transform: translateY(1px);
+}
+
+.admin-login-footer {
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #f1f5f9;
+  text-align: center;
+}
+
+.admin-login-footer .back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #64748b;
+  font-size: 0.88rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.admin-login-footer .back-link:hover {
+  color: #2563eb;
 }

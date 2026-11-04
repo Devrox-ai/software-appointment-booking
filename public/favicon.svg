@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <defs>
+    <linearGradient id="tn-top" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+    <linearGradient id="tn-left" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+    <linearGradient id="tn-right" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+  </defs>
+  <!-- Background squircle -->
+  <rect width="64" height="64" rx="14" fill="#0f172a"/>
+  <!-- Geometric Tech Hexagonal Node -->
+  <!-- Top facet -->
+  <path d="M32 11 L52 22.5 L32 34 L12 22.5 Z" fill="url(#tn-top)"/>
+  <!-- Left facet -->
+  <path d="M12 22.5 L32 34 L32 55 L12 43.5 Z" fill="url(#tn-left)"/>
+  <!-- Right facet -->
+  <path d="M32 34 L52 22.5 L52 43.5 L32 55 Z" fill="url(#tn-right)"/>
+  <!-- Tech Vertex Circuit Overlay -->
+  <path d="M32 34 L32 46" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M32 34 L43 27.5" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M32 34 L21 27.5" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="32" cy="34" r="3.5" fill="#38bdf8"/>
+  <circle cx="32" cy="46" r="2" fill="#ffffff"/>
+  <circle cx="43" cy="27.5" r="2" fill="#ffffff"/>
+  <circle cx="21" cy="27.5" r="2" fill="#ffffff"/>
+</svg>

@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= title %> | <%= settings.companyName %> Admin</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2">
+  <link rel="alternate icon" type="image/x-icon" href="/favicon.ico?v=2">
+  <link rel="apple-touch-icon" href="/images/logo-icon.svg">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/admin.css">
 </head>
@@ -12,7 +15,7 @@
     <!-- Sidebar -->
     <aside class="admin-sidebar" id="adminSidebar">
       <div class="sidebar-brand">
-        <span class="nav-brand-icon">&#9670;</span>
+        <img src="/images/logo-icon.svg?v=2" alt="<%= settings.companyName %> Logo" width="28" height="28" class="sidebar-brand-icon">
         <span><%= settings.companyName %></span>
       </div>
       <nav class="sidebar-nav">

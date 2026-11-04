@@ -161,8 +161,29 @@ p {
   color: var(--navy);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   letter-spacing: -0.3px;
+  text-decoration: none;
+}
+
+.nav-brand-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.12);
+  transition: transform 0.2s ease;
+}
+
+.nav-brand:hover .nav-brand-logo {
+  transform: scale(1.05);
+}
+
+.nav-brand-text {
+  display: inline-block;
+  color: var(--navy);
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 .nav-brand-icon {
@@ -1379,6 +1400,25 @@ p {
   color: #ffffff;
   font-size: 1.1rem;
   margin-bottom: 1.25rem;
+}
+
+.footer-brand-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1.25rem;
+}
+
+.footer-brand-logo {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.footer-brand-heading {
+  margin-bottom: 0 !important;
 }
 
 .footer-text {
