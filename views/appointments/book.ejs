@@ -4,41 +4,30 @@
   <section class="page-header">
     <div class="container">
       <h1>Book a Software Consultation</h1>
-      <p>Schedule a 1-on-1 strategy meeting with our senior engineering team</p>
+      <p>Schedule a 1-on-1 strategy meeting with our engineering team on a single seamless page</p>
     </div>
   </section>
 
-  <!-- Booking Wizard Section -->
-  <section class="section" id="bookingWizardSection">
-    <div class="container" id="bookingWizardContainer">
+  <!-- Single Continuous Booking Page Section -->
+  <section class="section" id="bookingSinglePageSection">
+    <div class="container" id="bookingPageContainer" style="max-width: 960px;">
+      
       <% if (typeof error !== 'undefined' && error) { %>
-        <div class="alert alert-error" id="serverErrorMessage"><%= error %></div>
+        <div class="alert alert-error" id="serverErrorMessage" style="margin-bottom: 2rem;"><%= error %></div>
       <% } %>
 
-      <!-- Progress Indicator Bar -->
-      <div class="booking-progress" id="bookingProgress">
-        <div class="progress-step active" data-step="1">
-          <div class="progress-step-number">1</div>
-          <div class="progress-step-label">1. Service</div>
+      <!-- Top Quick Status Strip (Shows live progress as user completes the single page) -->
+      <div class="single-page-status-strip card" id="bookingStatusStrip" style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between; padding: 0.85rem 1.25rem; margin-bottom: 2rem; background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">Consultation Booking:</span>
+          <span id="stripServiceBadge" class="badge badge-pending" style="font-weight: 600;">1. Select Service Below</span>
         </div>
-        <div class="progress-line"></div>
-        <div class="progress-step" data-step="2">
-          <div class="progress-step-number">2</div>
-          <div class="progress-step-label">2. Details</div>
-        </div>
-        <div class="progress-line"></div>
-        <div class="progress-step" data-step="3">
-          <div class="progress-step-number">3</div>
-          <div class="progress-step-label">3. Date & Time</div>
-        </div>
-        <div class="progress-line"></div>
-        <div class="progress-step" data-step="4">
-          <div class="progress-step-number">4</div>
-          <div class="progress-step-label">4. Confirm</div>
+        <div id="stripDetailsBadge" style="font-size: 0.88rem; color: var(--text-muted);">
+          <span>Fill details &rarr; Pick date &rarr; Confirm</span>
         </div>
       </div>
 
-      <!-- Multi-Step Form -->
+      <!-- Main Unified Form (All 4 Sections on THE SAME PAGE) -->
       <form id="bookingForm" action="/book" method="POST" novalidate>
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <input type="hidden" name="serviceId" id="serviceId" value="<%= (typeof formData !== 'undefined' && formData.serviceId) || (typeof selectedService !== 'undefined' && selectedService ? selectedService : '') %>">
@@ -47,22 +36,16 @@
         <input type="hidden" name="customerPhone" id="customerPhone" value="<%= (typeof formData !== 'undefined' && formData.customerPhone) || '' %>">
 
         <!-- ============================================================== -->
-        <!-- STEP 1: SERVICE SELECTION                                      -->
+        <!-- SECTION 1: SERVICE SELECTION (TOP OF PAGE)                     -->
         <!-- ============================================================== -->
-        <div class="booking-step" id="step1">
-          <div class="step-header-wrap">
-            <div>
-              <h2 class="step-heading">Step 1 — Select a Software Service</h2>
-              <p class="step-description">Choose the solution you want to discuss during your consultation</p>
-            </div>
-            
-            <!-- Quick Top Action Bar (Visible when service selected) -->
-            <div id="serviceTopActionBar" class="service-top-action-bar" style="<%= (typeof selectedService !== 'undefined' && selectedService) ? 'display: flex;' : 'display: none;' %>">
-              <div class="selected-service-pill">
-                <span class="pill-label">&#10003; Selected:</span>
-                <strong id="topSelectedServiceName"><%= (typeof selectedService !== 'undefined' && selectedService) ? 'Service Selected' : 'None' %></strong>
+        <div class="booking-section-block" id="sectionServiceSelection">
+          <div class="section-title-wrap" style="margin-bottom: 1.25rem;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="step-circle-badge">1</span>
+              <div>
+                <h2 style="font-size: 1.35rem; margin: 0; color: var(--navy);">Select a Software Service</h2>
+                <p style="margin: 0; font-size: 0.9rem; color: var(--text-muted);">Click any service below to begin. The details form will open directly underneath.</p>
               </div>
-              <button type="button" class="btn btn-primary btn-next" data-next="2">Continue to Customer Details &rarr;</button>
             </div>
           </div>
 
@@ -79,7 +62,7 @@
                   <h3 class="service-card-title"><%= service.name %></h3>
                   <p class="service-card-desc"><%= service.description %></p>
                   <div class="service-card-footer">
-                    <span class="service-select-btn">Select Service &rarr;</span>
+                    <span class="service-select-btn">&#10010; Click to Select</span>
                     <div class="service-check">&#10003; Selected</div>
                   </div>
                 </div>
@@ -90,37 +73,29 @@
               </div>
             <% } %>
           </div>
-
-          <!-- Bottom Navigation for Step 1 -->
-          <div class="booking-nav">
-            <div></div>
-            <button type="button" class="btn btn-primary btn-lg btn-next" data-next="2" id="step1BottomNext">
-              Continue to Customer Details &rarr;
-            </button>
-          </div>
+          <span class="field-error-msg" id="errServiceSelection" style="margin-top: 8px;"></span>
         </div>
 
         <!-- ============================================================== -->
-        <!-- STEP 2: CUSTOMER DETAILS                                       -->
+        <!-- SECTION 2: CUSTOMER DETAILS (APPEARS BELOW ON SAME PAGE)       -->
         <!-- ============================================================== -->
-        <div class="booking-step" id="step2" style="display: none;">
-          <!-- Top Service Summary Banner with One-Click Change -->
-          <div class="selected-service-banner card">
-            <div class="banner-left">
-              <span class="banner-badge">&#10003; Selected Service</span>
-              <h3 class="banner-title" id="step2SelectedServiceName">Service Name</h3>
+        <div class="booking-section-block" id="sectionCustomerDetails" style="margin-top: 2.5rem; display: none;">
+          <div class="section-title-wrap" style="margin-bottom: 1.25rem; padding-top: 1.5rem; border-top: 2px dashed #e2e8f0;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="step-circle-badge">2</span>
+                <div>
+                  <h2 style="font-size: 1.35rem; margin: 0; color: var(--navy);">Your Contact &amp; Project Details</h2>
+                  <p style="margin: 0; font-size: 0.9rem; color: var(--text-muted);">Please provide your contact information and requirements for this consultation.</p>
+                </div>
+              </div>
+              <div class="selected-service-chip" style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 20px; padding: 4px 14px; font-size: 0.85rem; color: #1e40af;">
+                Service: <strong id="chipServiceName">Selected Service</strong>
+              </div>
             </div>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="window.bookingWizardGoTo(1)">&#9998; Change Service</button>
           </div>
 
-          <div class="step-header-wrap">
-            <div>
-              <h2 class="step-heading">Step 2 — Customer Details</h2>
-              <p class="step-description">Enter your contact and project details so our team can prepare for the consultation</p>
-            </div>
-          </div>
-
-          <div class="booking-form-card card">
+          <div class="booking-form-card card" style="padding: 1.75rem;">
             <div class="grid-2">
               <!-- Full Name -->
               <div class="form-group">
@@ -148,7 +123,7 @@
                        autocomplete="email"
                        value="<%= (typeof formData !== 'undefined' && formData.customerEmail) || '' %>">
                 <span class="field-error-msg" id="errCustomerEmail"></span>
-                <small class="text-muted" style="font-size: 0.8rem; display: block; margin-top: 4px;">Confirmation &amp; calendar invite will be delivered here.</small>
+                <small class="text-muted" style="font-size: 0.8rem; display: block; margin-top: 4px;">Confirmation &amp; calendar invite will be delivered to this email.</small>
               </div>
             </div>
 
@@ -170,7 +145,7 @@
                         <option value="+49" data-flag="🇩🇪" data-name="Germany">🇩🇪 Germany (+49)</option>
                         <option value="+966" data-flag="🇸🇦" data-name="Saudi Arabia">🇸🇦 Saudi Arabia (+966)</option>
                         <option value="+974" data-flag="🇶🇦" data-name="Qatar">🇶🇦 Qatar (+974)</option>
-                        <option value="+965" data-flag="🇰🇼" data-name="Kuvert">🇰🇼 Kuwait (+965)</option>
+                        <option value="+965" data-flag="🇰🇼" data-name="Kuwait">🇰🇼 Kuwait (+965)</option>
                         <option value="+968" data-flag="🇴🇲" data-name="Oman">🇴🇲 Oman (+968)</option>
                         <option value="+973" data-flag="🇧🇭" data-name="Bahrain">🇧🇭 Bahrain (+973)</option>
                         <option value="+64" data-flag="🇳🇿" data-name="New Zealand">🇳🇿 New Zealand (+64)</option>
@@ -261,7 +236,7 @@
                        id="customerCompany"
                        name="customerCompany"
                        class="form-input"
-                       placeholder="e.g. Acme Innovations Inc."
+                       placeholder="e.g. Acme Tech Solutions"
                        autocomplete="organization"
                        value="<%= (typeof formData !== 'undefined' && formData.customerCompany) || '' %>">
               </div>
@@ -274,50 +249,46 @@
                         name="projectDescription"
                         class="form-textarea"
                         rows="4"
-                        placeholder="Briefly describe what you are looking to build, technical stack preferences, desired timeline, or key objectives..."
+                        placeholder="Briefly describe what you are looking to build, technical preferences, or key consultation objectives..."
                         required><%= (typeof formData !== 'undefined' && formData.projectDescription) || '' %></textarea>
               <span class="field-error-msg" id="errProjectDescription"></span>
             </div>
-          </div>
 
-          <div class="booking-nav">
-            <button type="button" class="btn btn-secondary btn-prev" data-prev="1">&larr; Back to Services</button>
-            <button type="button" class="btn btn-primary btn-lg btn-next" data-next="3">Continue to Schedule &rarr;</button>
+            <!-- Action Button to Unlock Schedule on Same Page -->
+            <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end;">
+              <button type="button" class="btn btn-primary btn-lg" id="btnContinueToDateTime">
+                Continue to Date &amp; Time Selection &darr;
+              </button>
+            </div>
           </div>
         </div>
 
         <!-- ============================================================== -->
-        <!-- STEP 3: SCHEDULE (DATE & TIME)                                 -->
+        <!-- SECTION 3: DATE & TIME (CONTINUOUS ON SAME PAGE)               -->
         <!-- ============================================================== -->
-        <div class="booking-step" id="step3" style="display: none;">
-          <!-- Top Service & Client Summary Banner -->
-          <div class="selected-service-banner card">
-            <div class="banner-left">
-              <span class="banner-badge">&#10003; Consultation For</span>
-              <h3 class="banner-title"><span id="step3SelectedServiceName">Software Service</span> &bull; <span id="step3CustomerName">Client</span></h3>
-            </div>
-            <div style="display: flex; gap: 0.5rem;">
-              <button type="button" class="btn btn-secondary btn-sm" onclick="window.bookingWizardGoTo(1)">&#9998; Change Service</button>
-              <button type="button" class="btn btn-secondary btn-sm" onclick="window.bookingWizardGoTo(2)">&#9998; Edit Details</button>
-            </div>
-          </div>
-
-          <div class="step-header-wrap">
-            <div>
-              <h2 class="step-heading">Step 3 — Select Date and Time</h2>
-              <p class="step-description">Pick an available consultation date from the calendar, then select a time slot</p>
+        <div class="booking-section-block" id="sectionDateTime" style="margin-top: 2.5rem; display: none;">
+          <div class="section-title-wrap" style="margin-bottom: 1.25rem; padding-top: 1.5rem; border-top: 2px dashed #e2e8f0;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="step-circle-badge">3</span>
+                <div>
+                  <h2 style="font-size: 1.35rem; margin: 0; color: var(--navy);">Select Appointment Date &amp; Time</h2>
+                  <p style="margin: 0; font-size: 0.9rem; color: var(--text-muted);">Choose a convenient date on the calendar, then pick from the live available slots.</p>
+                </div>
+              </div>
+              <span id="selectedDateDisplayBadge" class="badge badge-accepted" style="display: none;">Date Selected</span>
             </div>
           </div>
 
           <div class="grid-2 schedule-grid">
             <!-- Calendar Card -->
-            <div class="card calendar-card">
+            <div class="card calendar-card" style="padding: 1.5rem;">
               <div class="calendar-card-header">
-                <h3 class="calendar-heading">Select Date</h3>
+                <h3 class="calendar-heading">Calendar</h3>
                 <span class="timezone-badge">&#128337; Asia/Kolkata (IST)</span>
               </div>
               <div id="datePickerCalendar" class="calendar-grid-wrap">
-                <!-- Dynamically populated by booking.js -->
+                <!-- Dynamically rendered by single-page booking script -->
               </div>
               <div class="calendar-legend">
                 <span class="legend-item"><span class="legend-dot dot-available"></span> Available</span>
@@ -327,10 +298,10 @@
             </div>
 
             <!-- Time Slots Card -->
-            <div class="card time-slots-card">
+            <div class="card time-slots-card" style="padding: 1.5rem;">
               <div class="time-slots-header">
-                <h3 class="time-slots-heading">Available Time Slots</h3>
-                <span id="selectedDateDisplayBadge" class="badge badge-accepted" style="display: none;">Date Selected</span>
+                <h3 class="time-slots-heading">Available Slots</h3>
+                <small class="text-muted" id="slotStatusHint">Click a date first</small>
               </div>
               <div id="timeSlotsContainer" class="time-slots-wrapper">
                 <div class="time-slots-placeholder">
@@ -341,43 +312,41 @@
               <span class="field-error-msg" id="errAppointmentSlot" style="margin-top: 10px; display: block;"></span>
             </div>
           </div>
-
-          <div class="booking-nav">
-            <button type="button" class="btn btn-secondary btn-prev" data-prev="2">&larr; Back to Details</button>
-            <button type="button" class="btn btn-primary btn-lg btn-next" data-next="4">Review Booking &rarr;</button>
-          </div>
         </div>
 
         <!-- ============================================================== -->
-        <!-- STEP 4: REVIEW & CONFIRM                                       -->
+        <!-- SECTION 4: REVIEW & CONFIRM (SAME PAGE SUMMARY)                -->
         <!-- ============================================================== -->
-        <div class="booking-step" id="step4" style="display: none;">
-          <div class="step-header-wrap">
-            <div>
-              <h2 class="step-heading">Step 4 — Review and Confirm</h2>
-              <p class="step-description">Please double-check all details before final confirmation</p>
+        <div class="booking-section-block" id="sectionReview" style="margin-top: 2.5rem; display: none;">
+          <div class="section-title-wrap" style="margin-bottom: 1.25rem; padding-top: 1.5rem; border-top: 2px dashed #e2e8f0;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="step-circle-badge">4</span>
+              <div>
+                <h2 style="font-size: 1.35rem; margin: 0; color: var(--navy);">Review &amp; Confirm Booking</h2>
+                <p style="margin: 0; font-size: 0.9rem; color: var(--text-muted);">Verify your details below. You can scroll up and edit any section at any time without losing data.</p>
+              </div>
             </div>
           </div>
 
-          <div class="card booking-summary-card">
-            <!-- Service Block -->
+          <div class="card booking-summary-card" style="padding: 1.75rem;">
+            <!-- Service Summary -->
             <div class="review-section">
               <div class="review-section-header">
-                <h4><span class="review-icon">&#128736;</span> Selected Software Service</h4>
-                <button type="button" class="btn-text-edit" onclick="window.bookingWizardGoTo(1)">&#9998; Change</button>
+                <h4><span class="review-icon">&#128736;</span> Selected Service</h4>
+                <button type="button" class="btn-text-edit" id="btnEditService">&#9998; Change Service</button>
               </div>
               <div class="review-section-content">
-                <strong id="summaryService" class="review-highlight">—</strong>
+                <strong id="summaryService" class="review-highlight" style="font-size: 1.1rem; color: #1e40af;">—</strong>
               </div>
             </div>
 
             <div class="review-divider"></div>
 
-            <!-- Customer Details Block -->
+            <!-- Customer Details Summary -->
             <div class="review-section">
               <div class="review-section-header">
                 <h4><span class="review-icon">&#128100;</span> Customer &amp; Contact Details</h4>
-                <button type="button" class="btn-text-edit" onclick="window.bookingWizardGoTo(2)">&#9998; Edit</button>
+                <button type="button" class="btn-text-edit" id="btnEditDetails">&#9998; Edit Details</button>
               </div>
               <div class="review-grid">
                 <div class="review-item">
@@ -401,11 +370,11 @@
 
             <div class="review-divider"></div>
 
-            <!-- Schedule Block -->
+            <!-- Schedule Summary -->
             <div class="review-section">
               <div class="review-section-header">
                 <h4><span class="review-icon">&#128197;</span> Appointment Schedule</h4>
-                <button type="button" class="btn-text-edit" onclick="window.bookingWizardGoTo(3)">&#9998; Reschedule</button>
+                <button type="button" class="btn-text-edit" id="btnEditSchedule">&#9998; Change Date &amp; Time</button>
               </div>
               <div class="review-schedule-box">
                 <div class="schedule-date-box">
@@ -421,30 +390,30 @@
 
             <div class="review-divider"></div>
 
-            <!-- Project Requirements Block -->
+            <!-- Project Requirements Summary -->
             <div class="review-section">
               <div class="review-section-header">
                 <h4><span class="review-icon">&#128221;</span> Project Requirements</h4>
-                <button type="button" class="btn-text-edit" onclick="window.bookingWizardGoTo(2)">&#9998; Edit</button>
               </div>
-              <p class="review-description-text" id="summaryDescription">—</p>
+              <p class="review-description-text" id="summaryDescription" style="white-space: pre-wrap; color: var(--text-main); margin: 0;">—</p>
             </div>
           </div>
 
-          <!-- Submission Notice -->
-          <div class="booking-guarantee-note">
+          <!-- Guarantee & Email Notice -->
+          <div class="booking-guarantee-note" style="margin-top: 1.25rem;">
             <span class="guarantee-icon">&#128274;</span>
-            <p>Once submitted, your booking will be saved in MongoDB with status <strong>Pending</strong>, and automated notification emails will be dispatched via Google Gmail API OAuth 2.0 to your email address and our admin team.</p>
+            <p>Your booking will be recorded in MongoDB with status <strong>Pending</strong>, and notification emails will be dispatched automatically via Google Gmail API OAuth 2.0 to your submitted email address and our admin team.</p>
           </div>
 
-          <div class="booking-nav">
-            <button type="button" class="btn btn-secondary btn-prev" data-prev="3">&larr; Back to Schedule</button>
-            <button type="submit" class="btn btn-primary btn-lg btn-submit" id="btnSubmitBooking">
+          <!-- Submit Button -->
+          <div style="margin-top: 1.5rem; text-align: right;">
+            <button type="submit" class="btn btn-primary btn-lg btn-submit" id="btnSubmitBooking" style="padding: 0.85rem 2rem; font-size: 1.05rem;">
               <span class="btn-text">&#10003; Confirm &amp; Submit Booking</span>
               <span class="btn-spinner" style="display: none;">Submitting your booking...</span>
             </button>
           </div>
         </div>
+
       </form>
     </div>
   </section>

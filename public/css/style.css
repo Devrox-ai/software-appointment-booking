@@ -843,6 +843,43 @@ p {
   height: 100%;
 }
 
+/* ─── Continuous Single-Page Booking Layout ───────────────────── */
+.booking-section-block {
+  scroll-margin-top: 80px;
+  animation: fadeIn 0.3s ease;
+}
+
+.step-circle-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.btn-text-edit {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+}
+
+.btn-text-edit:hover {
+  background: #eff6ff;
+  color: var(--primary-hover);
+}
+
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }

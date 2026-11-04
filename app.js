@@ -103,8 +103,23 @@ app.use((err, req, res, next) => {
 async function start() {
   try {
     await connectDB();
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
       console.log(`\n  ✔ Server running at http://localhost:${PORT}\n`);
+    });
+
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        console.error(`\n================================================================`);
+        console.error(`  ✘ [Port Conflict] Port ${PORT} is already in use by another process.`);
+        console.error(`    To free port ${PORT}, close any existing terminal running the server, or run:`);
+        console.error(`    npx kill-port ${PORT}`);
+        console.error(`    Alternatively, set PORT=3001 in your .env file.`);
+        console.error(`================================================================\n`);
+        process.exit(1);
+      } else {
+        console.error('Server error:', err);
+        process.exit(1);
+      }
     });
   } catch (error) {
     console.error('Failed to start server:', error.message);

@@ -108,8 +108,10 @@ async function runTests() {
     });
     assert(resBookPage.status === 200, 'GET /book?service=... returns HTTP 200');
     assert(resBookPage.html.includes(service._id.toString()), 'Page includes pre-selected serviceId');
-    assert(resBookPage.html.includes('Step 1 — Select a Software Service'), 'Page contains Step 1 heading');
-    assert(resBookPage.html.includes('Step 2 — Customer Details'), 'Page contains Step 2 heading');
+    assert(resBookPage.html.includes('Select a Software Service'), 'Page contains Section 1: Select Software Service');
+    assert(resBookPage.html.includes('Your Contact &amp; Project Details'), 'Page contains Section 2: Contact & Details on the SAME page');
+    assert(resBookPage.html.includes('Select Appointment Date &amp; Time'), 'Page contains Section 3: Date & Time on the SAME page');
+    assert(resBookPage.html.includes('Review &amp; Confirm Booking'), 'Page contains Section 4: Review & Confirm on the SAME page');
     assert(resBookPage.html.includes('countryCodeSelect'), 'Page contains Country Code Dropdown (countryCodeSelect)');
     assert(resBookPage.html.includes('🇮🇳 India (+91)'), 'India (+91) is present and set as default in dropdown');
 
